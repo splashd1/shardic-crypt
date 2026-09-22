@@ -1,0 +1,209 @@
+# shardic-envelope Keycloak demo.
+#
+# `docker-compose --env-file .env up -d` brings up Keycloak, the
+# combiner, and the 5 selected trustees (alice, bob, carol, dave, erin).
+# trustee-frank and trustee-grace are the other 2 of the 7 Keycloak
+# candidates; they're tagged with the "candidates" profile so a plain
+# `up` never starts them -- that omission IS the "5 of 7 selected"
+# mechanic. Start one explicitly with
+# `docker-compose --profile candidates up -d trustee-frank` if you want
+# to swap the selection for a different demo run.
+#
+# See README.md for the full walkthrough.
+
+x-trustee-env-base: &trustee-env-base
+  KEYCLOAK_URL: http://keycloak:8080
+  KEYCLOAK_REALM: shardic-demo
+  TRUSTEE_CLIENT_ID: shardic-trustee-client
+  COMBINER_URL: http://combiner:5000
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7
+    command: start-dev --import-realm
+    environment:
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      # Fixes the issuer to one value regardless of which hostname a
+      # request arrives on. Without this, start-dev derives the issuer
+      # per-request (localhost:8080 from the host vs. keycloak:8080
+      # from other containers), and a token minted via one hostname
+      # fails userinfo verification via the other -- bit the operator
+      # token flow below (host-side curl, container-side verification)
+      # the moment it was added; trustee auth never crossed this
+      # boundary since trustees always use keycloak:8080 for both.
+      KC_HOSTNAME: http://keycloak:8080
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro,Z
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    networks: [shardic-demo]
+
+  combiner:
+    build:
+      context: ..
+      dockerfile: demo/combiner/Dockerfile
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: shardic-demo
+      ADMIN_CLIENT_ID: shardic-combiner-admin
+      ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
+      OPERATOR_OIDC_ISSUER: http://keycloak:8080
+      OPERATOR_REALM: shardic-demo
+      SAMPLE_SECRET_PATH: /data/sample-secret
+      VAULT_OUTDIR: /data/vault
+      RECOVERED_OUTDIR: /data/recovered
+      # Notification channels -- see docs/notification-channels.md.
+      # log_line needs no config and is always on. webhook/email only
+      # activate if their vars are actually set (unset is empty string
+      # here, which _build_notification_dispatcher() treats as "don't
+      # register this channel"). NOTIFY_CEREMONY_INVITE_CHANNELS
+      # decides which *registered* channels actually fire for ceremony
+      # invitations -- e.g. "log_line,email" once email is configured.
+      NOTIFY_CEREMONY_INVITE_CHANNELS: ${NOTIFY_CEREMONY_INVITE_CHANNELS:-log_line}
+      NOTIFY_WEBHOOK_URL: ${NOTIFY_WEBHOOK_URL:-}
+      NOTIFY_EMAIL_SMTP_HOST: ${NOTIFY_EMAIL_SMTP_HOST:-}
+      NOTIFY_EMAIL_SMTP_PORT: ${NOTIFY_EMAIL_SMTP_PORT:-}
+      NOTIFY_EMAIL_USERNAME: ${NOTIFY_EMAIL_USERNAME:-}
+      NOTIFY_EMAIL_APP_PASSWORD: ${NOTIFY_EMAIL_APP_PASSWORD:-}
+      NOTIFY_EMAIL_BASE_ADDRESS: ${NOTIFY_EMAIL_BASE_ADDRESS:-}
+    volumes:
+      - combiner-data:/data
+      - ./sample-secret:/data/sample-secret:ro,Z
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/healthz', timeout=3)\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [shardic-demo]
+
+  trustee-alice:
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: alice
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_ALICE}
+    volumes:
+      - trustee-alice-keys:/data
+    networks: [shardic-demo]
+
+  trustee-bob:
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: bob
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_BOB}
+    volumes:
+      - trustee-bob-keys:/data
+    networks: [shardic-demo]
+
+  trustee-carol:
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: carol
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_CAROL}
+    volumes:
+      - trustee-carol-keys:/data
+    networks: [shardic-demo]
+
+  trustee-dave:
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: dave
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_DAVE}
+    volumes:
+      - trustee-dave-keys:/data
+    networks: [shardic-demo]
+
+  trustee-erin:
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: erin
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_ERIN}
+    volumes:
+      - trustee-erin-keys:/data
+    networks: [shardic-demo]
+
+  trustee-frank:
+    profiles: ["candidates"]
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: frank
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_FRANK}
+    volumes:
+      - trustee-frank-keys:/data
+    networks: [shardic-demo]
+
+  trustee-grace:
+    profiles: ["candidates"]
+    build:
+      context: ..
+      dockerfile: demo/trustee/Dockerfile
+    depends_on:
+      combiner:
+        condition: service_healthy
+    environment:
+      <<: *trustee-env-base
+      TRUSTEE_USERNAME: grace
+      TRUSTEE_PASSWORD: ${TRUSTEE_PASSWORD_GRACE}
+    volumes:
+      - trustee-grace-keys:/data
+    networks: [shardic-demo]
+
+volumes:
+  combiner-data:
+  trustee-alice-keys:
+  trustee-bob-keys:
+  trustee-carol-keys:
+  trustee-dave-keys:
+  trustee-erin-keys:
+  trustee-frank-keys:
+  trustee-grace-keys:
+
+networks:
+  shardic-demo: {}

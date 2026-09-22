@@ -1,0 +1,8 @@
+{
+    "outdir": "/data/recovered",
+    "trustees_used": [
+        "alice",
+        "bob",
+        "carol"
+    ]
+}

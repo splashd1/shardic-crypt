@@ -1,0 +1,757 @@
+<title>shardic-envelope — how the ceremony works</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #eef0ec;
+    --surface: #f8f8f5;
+    --surface-2: #e3e5df;
+    --text: #1b1d22;
+    --text-dim: #5b6068;
+    --line: #d2d5cd;
+    --accent: #1f8f7c;
+    --accent-ink: #f3fbf9;
+    --prime: #a8641f;
+    --prime-ink: #fff6ec;
+    --paused: #b0424a;
+    --shadow: 0 1px 2px rgba(20, 24, 20, 0.06);
+
+    --font-display: "Roboto Slab", "Zilla Slab", "Rockwell Nova", "Rockwell", ui-serif, Georgia, serif;
+    --font-body: "Avenir Next", "Century Gothic", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b;
+      --surface: #1b1f27;
+      --surface-2: #232833;
+      --text: #e6e4dc;
+      --text-dim: #9aa0ab;
+      --line: #2c313c;
+      --accent: #5fd4c0;
+      --accent-ink: #082824;
+      --prime: #d68a3d;
+      --prime-ink: #2a1a08;
+      --paused: #d4636a;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --surface: #1b1f27; --surface-2: #232833;
+    --text: #e6e4dc; --text-dim: #9aa0ab; --line: #2c313c;
+    --accent: #5fd4c0; --accent-ink: #082824;
+    --prime: #d68a3d; --prime-ink: #2a1a08;
+    --paused: #d4636a; --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  :root[data-theme="light"] {
+    --bg: #eef0ec; --surface: #f8f8f5; --surface-2: #e3e5df;
+    --text: #1b1d22; --text-dim: #5b6068; --line: #d2d5cd;
+    --accent: #1f8f7c; --accent-ink: #f3fbf9;
+    --prime: #a8641f; --prime-ink: #fff6ec;
+    --paused: #b0424a; --shadow: 0 1px 2px rgba(20, 24, 20, 0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+
+  p { margin: 0; }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  code, .mono { font-family: var(--font-mono); }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ------------------------------------------------------------- layout */
+
+  .shell {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 3rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+  }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.5rem 1.25rem 4rem; }
+  }
+
+  .rail {
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  @media (max-width: 860px) {
+    .rail {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  .rail__link {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 0.15rem 0;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
+  }
+
+  @media (max-width: 860px) {
+    .rail__link { border-left: none; padding-left: 0; border-bottom: 2px solid transparent; padding-bottom: 0.2rem; }
+  }
+
+  .rail__link .mono { font-size: 0.72rem; color: var(--text-dim); }
+
+  .rail__link.is-active {
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  @media (max-width: 860px) {
+    .rail__link.is-active { border-left-color: transparent; border-bottom-color: var(--accent); }
+  }
+  .rail__link.is-active .mono { color: var(--accent); }
+
+  main { min-width: 0; }
+
+  section { padding-top: 1rem; }
+  section + section { margin-top: 5rem; }
+
+  .lede {
+    max-width: 62ch;
+    color: var(--text-dim);
+    font-size: 1.05rem;
+  }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section-head h2 { font-size: 1.85rem; }
+
+  /* --------------------------------------------------------------- hero */
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 2.5rem;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  .hero__diagram-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+  .hero__diagram-wrap .hub-diagram { width: 100%; max-width: 300px; }
+  .hero__caption { font-size: 0.78rem; color: var(--text-dim); text-align: center; max-width: 26ch; }
+
+  /* ---------------------------------------------------------- hub diagram */
+
+  .hub-diagram { width: 100%; height: auto; overflow: visible; }
+
+  .hub-diagram__link {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    opacity: 0.55;
+  }
+  .hub-diagram__link.is-paused {
+    stroke: var(--text-dim);
+    stroke-dasharray: 4 4;
+    opacity: 0.4;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hub-diagram__link {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw-link 1.1s ease-out forwards;
+      animation-delay: calc(var(--i, 0) * 120ms);
+    }
+    .hub-diagram__link.is-paused { animation: none; stroke-dashoffset: 0; }
+  }
+  @keyframes draw-link { to { stroke-dashoffset: 0; } }
+
+  .hub-diagram__hub circle { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .hub-diagram__hub text {
+    font-family: var(--font-mono);
+    text-anchor: middle;
+    fill: var(--text);
+  }
+  .hub-diagram__hub .hub-diagram__hub-sub { fill: var(--text-dim); font-size: 7px; }
+  .hub-diagram__hub .hub-diagram__hub-label { font-size: 9px; letter-spacing: 0.03em; }
+
+  .hub-diagram__node circle {
+    fill: var(--surface);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .hub-diagram__node text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-anchor: middle;
+    fill: var(--text);
+  }
+  .hub-diagram__node.is-prime circle { stroke: var(--prime); fill: var(--prime); }
+  .hub-diagram__node.is-prime text { fill: var(--prime-ink); }
+  .hub-diagram__node.is-paused circle { stroke: var(--text-dim); fill: var(--surface); opacity: 0.55; }
+  .hub-diagram__node.is-paused text { fill: var(--text-dim); }
+
+  .hub-diagram__tag {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-anchor: middle;
+    fill: var(--prime);
+  }
+
+  .hub-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+  }
+  .hub-legend__item { display: flex; align-items: center; gap: 0.4rem; }
+  .hub-legend__dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; display: inline-block; }
+  .hub-legend__dot--prime { background: var(--prime); }
+  .hub-legend__dot--live { background: var(--accent); }
+  .hub-legend__dot--paused { background: var(--text-dim); opacity: 0.6; }
+
+  /* ------------------------------------------------------------- panels */
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.75rem;
+  }
+
+  .diagram-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 2rem;
+    align-items: center;
+  }
+  @media (max-width: 720px) {
+    .diagram-panel { grid-template-columns: 1fr; }
+  }
+
+  /* ------------------------------------------------------------ pipeline */
+
+  .pipeline { display: flex; flex-direction: column; gap: 0.9rem; }
+  .pipeline__lane {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .pipeline__box {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 0.5rem 0.8rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .pipeline__box--sealed { border-color: var(--accent); color: var(--accent); }
+  .pipeline__box--split { border-color: var(--prime); color: var(--prime); }
+  .pipeline__arrow {
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+  .pipeline__arrow::after { content: "\2192"; color: var(--accent); font-size: 1rem; }
+
+  /* -------------------------------------------------------------- seal */
+
+  .seal-diagram { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+  .seal-diagram svg { width: 140px; height: 140px; }
+  .seal-diagram__ring { fill: none; stroke: var(--line); stroke-width: 2; }
+  .seal-diagram__mark { fill: var(--accent); }
+  .seal-diagram__mark-ink { fill: var(--accent-ink); }
+  .seal-diagram__label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ---------------------------------------------------------- envelope */
+
+  .envelope-diagram svg { width: 100%; max-width: 260px; height: auto; }
+  .envelope-diagram__body { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .envelope-diagram__flap { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .envelope-diagram__chip {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    text-anchor: middle;
+  }
+  .envelope-diagram__chip-bg { rx: 4; }
+  .envelope-diagram__chip-bg--shard { fill: var(--accent); }
+  .envelope-diagram__chip-bg--key { fill: var(--prime); }
+  .envelope-diagram__chip--shard { fill: var(--accent-ink); }
+  .envelope-diagram__chip--key { fill: var(--prime-ink); }
+
+  /* ------------------------------------------------------------- verify */
+
+  .verify-diagram__svg { width: 100%; max-width: 280px; height: auto; }
+  .verify-diagram__file { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .verify-diagram__match { stroke: var(--accent); stroke-width: 3; fill: none; stroke-linecap: round; }
+  .verify-diagram__match-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    fill: var(--accent);
+    text-anchor: middle;
+  }
+
+  /* -------------------------------------------------------------- lists */
+
+  .property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+  .property-card {
+    border-top: 2px solid var(--accent);
+    padding-top: 0.85rem;
+  }
+  .property-card h3 { font-size: 1rem; font-family: var(--font-body); font-weight: 700; margin-bottom: 0.4rem; }
+  .property-card p { color: var(--text-dim); font-size: 0.92rem; }
+
+  .callout {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    border-left: 2px solid var(--line);
+    padding-left: 1rem;
+    margin-top: 1.25rem;
+    max-width: 62ch;
+  }
+  .callout strong { color: var(--text); }
+
+  /* ----------------------------------------------------------- shortcuts */
+
+  .shortcuts {
+    margin-top: 6rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+  .shortcuts__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.75rem 2rem;
+    margin-top: 1.25rem;
+  }
+  .shortcuts__item {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.6rem;
+  }
+  .shortcuts__item::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--paused);
+    margin-top: 0.55rem;
+    flex-shrink: 0;
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+  td.mono { font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Ceremony phases">
+    <a class="rail__link" href="#intro"><span class="mono">·</span> Overview</a>
+    <a class="rail__link" href="#formation"><span class="mono">01</span> Formation</a>
+    <a class="rail__link" href="#dormant"><span class="mono">02</span> Protected &amp; Dormant</a>
+    <a class="rail__link" href="#threshold"><span class="mono">03</span> Threshold-Proof</a>
+    <a class="rail__link" href="#finalize"><span class="mono">04</span> Finalize &amp; Verify</a>
+    <a class="rail__link" href="#trust"><span class="mono">·</span> Trust properties</a>
+  </nav>
+
+  <main>
+    <section id="intro" class="hero">
+      <div>
+        <p class="eyebrow">shardic-envelope · a threshold custody ceremony</p>
+        <h1>A secret, broken into shards, held by no one who could betray it alone.</h1>
+        <p class="lede">
+          shardic-envelope extends shardic-prime's threshold recovery scheme with
+          real, independent trustees. A vault's encryption key is split with
+          Shamir's Secret Sharing over GF(256) into five fragments; each fragment
+          is delivered only to the one device cryptographically authorized to
+          hold it. The party running the ceremony — the <strong>combiner</strong> —
+          never once sees a bare codeword, before or after.
+        </p>
+      </div>
+      <div class="hero__diagram-wrap">
+        <svg class="hub-diagram" viewBox="0 0 440 440" role="img" aria-labelledby="hub-intro-title">
+          <title id="hub-intro-title">Combiner at center, five registered trustees around it: alice (prime), bob, carol, dave, erin</title>
+          <line pathLength="1" class="hub-diagram__link" style="--i:0" x1="220" y1="220" x2="220" y2="55"></line>
+          <line pathLength="1" class="hub-diagram__link" style="--i:1" x1="220" y1="220" x2="377" y2="169"></line>
+          <line pathLength="1" class="hub-diagram__link" style="--i:2" x1="220" y1="220" x2="317" y2="354"></line>
+          <line pathLength="1" class="hub-diagram__link" style="--i:3" x1="220" y1="220" x2="123" y2="354"></line>
+          <line pathLength="1" class="hub-diagram__link" style="--i:4" x1="220" y1="220" x2="63" y2="169"></line>
+          <g class="hub-diagram__hub">
+            <circle cx="220" cy="220" r="42"></circle>
+            <text class="hub-diagram__hub-label" x="220" y="216">combiner</text>
+            <text class="hub-diagram__hub-sub" x="220" y="229">blind to codewords</text>
+          </g>
+          <text class="hub-diagram__tag" x="220" y="18">prime</text>
+          <g class="hub-diagram__node is-prime"><circle cx="220" cy="55" r="26"></circle><text x="220" y="59">alice</text></g>
+          <g class="hub-diagram__node"><circle cx="377" cy="169" r="26"></circle><text x="377" y="173">bob</text></g>
+          <g class="hub-diagram__node"><circle cx="317" cy="354" r="26"></circle><text x="317" y="358">carol</text></g>
+          <g class="hub-diagram__node"><circle cx="123" cy="354" r="26"></circle><text x="123" y="358">dave</text></g>
+          <g class="hub-diagram__node"><circle cx="63" cy="169" r="26"></circle><text x="63" y="173">erin</text></g>
+        </svg>
+        <p class="hero__caption">1 mandatory prime trustee + 4 pool trustees. Threshold: prime + 2 of 4 pool.</p>
+      </div>
+    </section>
+
+    <section id="formation">
+      <div class="section-head">
+        <p class="eyebrow">Phase 01</p>
+        <h2>Formation</h2>
+        <p class="lede">
+          Every trustee generates a keypair on their own device and registers the
+          public half with the combiner — before any vault exists, independent of
+          which vault they'll eventually help recover. Only once all five are
+          registered can a vault be created at all.
+        </p>
+      </div>
+
+      <div class="panel diagram-panel">
+        <div>
+          <p style="margin-bottom:0.9rem; color:var(--text-dim); font-size:0.92rem; max-width:52ch;">
+            Vault creation runs two transformations at once: the plaintext is sealed
+            under a random key, and that key is fragmented so no single copy of it
+            survives anywhere.
+          </p>
+          <div class="pipeline">
+            <div class="pipeline__lane">
+              <span class="pipeline__box">plaintext</span>
+              <span class="pipeline__arrow">AES&#8209;256&#8209;GCM</span>
+              <span class="pipeline__box pipeline__box--sealed">.krypt ciphertext</span>
+            </div>
+            <div class="pipeline__lane">
+              <span class="pipeline__box">DEK</span>
+              <span class="pipeline__arrow">Shamir split &middot; GF(256)</span>
+              <span class="pipeline__box pipeline__box--split">1 prime mask + 4 pool shares</span>
+            </div>
+          </div>
+          <p class="callout">
+            <strong>Then, and only then,</strong> each of the five resulting
+            codewords is individually wrapped to its trustee's registered public
+            key — never printed, never written to disk in the clear. The instant
+            every envelope exists, the plaintext codewords are securely
+            overwritten and deleted.
+          </p>
+        </div>
+        <div>
+          <svg class="hub-diagram" viewBox="0 0 440 440" role="img" aria-labelledby="hub-formation-title">
+            <title id="hub-formation-title">All five trustees registered and holding a wrapped envelope</title>
+            <line pathLength="1" class="hub-diagram__link" style="--i:0" x1="220" y1="220" x2="220" y2="55"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:1" x1="220" y1="220" x2="377" y2="169"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:2" x1="220" y1="220" x2="317" y2="354"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:3" x1="220" y1="220" x2="123" y2="354"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:4" x1="220" y1="220" x2="63" y2="169"></line>
+            <g class="hub-diagram__hub">
+              <circle cx="220" cy="220" r="42"></circle>
+              <text class="hub-diagram__hub-label" x="220" y="216">combiner</text>
+              <text class="hub-diagram__hub-sub" x="220" y="229">wraps &amp; destroys</text>
+            </g>
+            <text class="hub-diagram__tag" x="220" y="18">prime</text>
+            <g class="hub-diagram__node is-prime"><circle cx="220" cy="55" r="26"></circle><text x="220" y="59">alice</text></g>
+            <g class="hub-diagram__node"><circle cx="377" cy="169" r="26"></circle><text x="377" y="173">bob</text></g>
+            <g class="hub-diagram__node"><circle cx="317" cy="354" r="26"></circle><text x="317" y="358">carol</text></g>
+            <g class="hub-diagram__node"><circle cx="123" cy="354" r="26"></circle><text x="123" y="358">dave</text></g>
+            <g class="hub-diagram__node"><circle cx="63" cy="169" r="26"></circle><text x="63" y="173">erin</text></g>
+          </svg>
+          <div class="hub-legend">
+            <span class="hub-legend__item"><span class="hub-legend__dot hub-legend__dot--prime"></span>prime</span>
+            <span class="hub-legend__item"><span class="hub-legend__dot hub-legend__dot--live"></span>pool</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dormant">
+      <div class="section-head">
+        <p class="eyebrow">Phase 02</p>
+        <h2>Protected &amp; Dormant</h2>
+        <p class="lede">
+          The vault is sealed. Every codeword has already been destroyed in
+          plaintext form — what remains are five individually-wrapped envelopes
+          and a ciphertext file that, on its own, decrypts for no one. This state
+          has no expiry; it can sit untouched indefinitely.
+        </p>
+      </div>
+      <div class="panel diagram-panel">
+        <div>
+          <p style="color:var(--text-dim); font-size:0.92rem; max-width:52ch;">
+            Not the combiner, not the operator who ran the ceremony, not any one
+            trustee acting alone — nobody holds enough of the secret to
+            reconstruct the key by themselves. That's the point: custody is
+            distributed by construction, not by policy.
+          </p>
+          <p class="callout">
+            <strong>No mapping is ever stored</strong> between a codeword and the
+            share it unlocks. Recovery works by trial against every unmatched
+            share, using AES-GCM's own authentication tag as the correctness
+            check — so even the metadata sitting in a shared <code>.krypt</code>
+            file can't be used to infer who holds what.
+          </p>
+        </div>
+        <div class="seal-diagram">
+          <svg viewBox="0 0 140 140" role="img" aria-label="A sealed, dormant vault">
+            <circle class="seal-diagram__ring" cx="70" cy="70" r="60"></circle>
+            <circle class="seal-diagram__ring" cx="70" cy="70" r="48"></circle>
+            <rect class="seal-diagram__mark" x="50" y="58" width="40" height="30" rx="3"></rect>
+            <rect class="seal-diagram__mark-ink" x="60" y="44" width="20" height="18" rx="10"></rect>
+            <rect class="seal-diagram__mark" x="60" y="44" width="20" height="18" rx="10" fill="none" stroke="var(--accent)" stroke-width="3"></rect>
+          </svg>
+          <p class="seal-diagram__label">sealed &middot; no expiry</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="threshold">
+      <div class="section-head">
+        <p class="eyebrow">Phase 03</p>
+        <h2>Threshold-Proof</h2>
+        <p class="lede">
+          An operator opens a recovery session. Each <em>live</em> trustee decrypts
+          its own envelope locally, on its own device, and derives its fragment
+          of the key — then sends back only that fragment, never the codeword
+          that produced it.
+        </p>
+      </div>
+
+      <div class="panel diagram-panel">
+        <div>
+          <svg class="hub-diagram" viewBox="0 0 440 440" role="img" aria-labelledby="hub-threshold-title">
+            <title id="hub-threshold-title">alice, bob, and carol live and contributing; dave and erin paused</title>
+            <line pathLength="1" class="hub-diagram__link" style="--i:0" x1="220" y1="220" x2="220" y2="55"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:1" x1="220" y1="220" x2="377" y2="169"></line>
+            <line pathLength="1" class="hub-diagram__link" style="--i:2" x1="220" y1="220" x2="317" y2="354"></line>
+            <line pathLength="1" class="hub-diagram__link is-paused" x1="220" y1="220" x2="123" y2="354"></line>
+            <line pathLength="1" class="hub-diagram__link is-paused" x1="220" y1="220" x2="63" y2="169"></line>
+            <g class="hub-diagram__hub">
+              <circle cx="220" cy="220" r="42"></circle>
+              <text class="hub-diagram__hub-label" x="220" y="216">combiner</text>
+              <text class="hub-diagram__hub-sub" x="220" y="229">2 of 5 paused</text>
+            </g>
+            <text class="hub-diagram__tag" x="220" y="18">prime</text>
+            <g class="hub-diagram__node is-prime"><circle cx="220" cy="55" r="26"></circle><text x="220" y="59">alice</text></g>
+            <g class="hub-diagram__node"><circle cx="377" cy="169" r="26"></circle><text x="377" y="173">bob</text></g>
+            <g class="hub-diagram__node"><circle cx="317" cy="354" r="26"></circle><text x="317" y="358">carol</text></g>
+            <g class="hub-diagram__node is-paused"><circle cx="123" cy="354" r="26"></circle><text x="123" y="358">dave</text></g>
+            <g class="hub-diagram__node is-paused"><circle cx="63" cy="169" r="26"></circle><text x="63" y="173">erin</text></g>
+          </svg>
+          <div class="hub-legend">
+            <span class="hub-legend__item"><span class="hub-legend__dot hub-legend__dot--prime"></span>prime, live</span>
+            <span class="hub-legend__item"><span class="hub-legend__dot hub-legend__dot--live"></span>pool, live</span>
+            <span class="hub-legend__item"><span class="hub-legend__dot hub-legend__dot--paused"></span>paused</span>
+          </div>
+        </div>
+        <div>
+          <p style="color:var(--text-dim); font-size:0.92rem;">
+            Threshold is prime&nbsp;+&nbsp;2-of-4 pool — three trustees, not five.
+            <strong style="color:var(--text)">dave</strong> and
+            <strong style="color:var(--text)">erin</strong> being offline changes
+            nothing: <strong style="color:var(--text)">alice</strong>,
+            <strong style="color:var(--text)">bob</strong>, and
+            <strong style="color:var(--text)">carol</strong> are enough.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel envelope-diagram" style="margin-top:1.5rem; display:grid; grid-template-columns: minmax(0,1fr) 260px; gap:2rem; align-items:center;">
+        <div>
+          <h3 style="font-family:var(--font-body); font-size:1.05rem; margin-bottom:0.5rem;">The self-addressed envelope</h3>
+          <p style="color:var(--text-dim); font-size:0.92rem; max-width:50ch;">
+            The envelope a trustee unwraps to get its codeword also carries the
+            combiner's own public key, bundled in alongside it. That's what lets
+            the trustee wrap its reply shard back to the combiner without a
+            separate lookup step — the return address rides along with the
+            original delivery.
+          </p>
+        </div>
+        <svg viewBox="0 0 220 150" role="img" aria-label="An envelope containing a wrapped shard and the combiner's bundled public key">
+          <rect class="envelope-diagram__body" x="10" y="30" width="200" height="105" rx="5"></rect>
+          <path class="envelope-diagram__flap" d="M10,30 L110,95 L210,30"></path>
+          <rect class="envelope-diagram__chip-bg envelope-diagram__chip-bg--shard" x="28" y="75" width="80" height="40" rx="4"></rect>
+          <text class="envelope-diagram__chip envelope-diagram__chip--shard" x="68" y="93">wrapped</text>
+          <text class="envelope-diagram__chip envelope-diagram__chip--shard" x="68" y="105">shard</text>
+          <rect class="envelope-diagram__chip-bg envelope-diagram__chip-bg--key" x="112" y="75" width="80" height="40" rx="4"></rect>
+          <text class="envelope-diagram__chip envelope-diagram__chip--key" x="152" y="93">combiner's</text>
+          <text class="envelope-diagram__chip envelope-diagram__chip--key" x="152" y="105">pubkey</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="finalize">
+      <div class="section-head">
+        <p class="eyebrow">Phase 04</p>
+        <h2>Finalize &amp; Verify</h2>
+        <p class="lede">
+          Once the prime mask and enough pool shares have arrived, the combiner
+          reconstructs the DEK via Shamir combination and decrypts the sealed
+          ciphertext. The recovered output is then compared, byte for byte,
+          against the original.
+        </p>
+      </div>
+      <div class="panel" style="display:flex; flex-direction:column; align-items:center; gap:1rem;">
+        <svg class="verify-diagram__svg" viewBox="0 0 260 120" role="img" aria-label="Recovered output compared byte-for-byte against the original, result: match">
+          <rect class="verify-diagram__file" x="10" y="20" width="80" height="80" rx="4"></rect>
+          <text x="50" y="65" text-anchor="middle" class="mono" style="font-size:9px; fill:var(--text-dim);">original</text>
+          <rect class="verify-diagram__file" x="170" y="20" width="80" height="80" rx="4"></rect>
+          <text x="210" y="65" text-anchor="middle" class="mono" style="font-size:9px; fill:var(--text-dim);">recovered</text>
+          <path class="verify-diagram__match" d="M112,52 L128,68 L148,42"></path>
+          <text class="verify-diagram__match-text" x="130" y="98">MATCH</text>
+        </svg>
+        <p style="color:var(--text-dim); font-size:0.85rem; max-width:44ch; text-align:center;">
+          The proof isn't that the ceremony ran without errors — it's that the
+          output is provably, bit-for-bit, the same file that went in.
+        </p>
+      </div>
+    </section>
+
+    <section id="trust">
+      <div class="section-head">
+        <p class="eyebrow">Why the ceremony can be trusted</p>
+        <h2>Trust properties</h2>
+      </div>
+      <div class="property-grid">
+        <div class="property-card">
+          <h3>No single-party custody</h3>
+          <p>Not the combiner, not the operator, not any one trustee — nobody holds enough of the secret alone, at any point in the lifecycle.</p>
+        </div>
+        <div class="property-card">
+          <h3>No stored mapping</h3>
+          <p>Which codeword unlocks which share is never recorded. A stolen or leaked <code>.krypt</code> file reveals nothing about trustee-to-share assignment.</p>
+        </div>
+        <div class="property-card">
+          <h3>Codewords never travel</h3>
+          <p>Each trustee unwraps and matches its own codeword locally. The combiner receives only the derived shard — never the codeword itself.</p>
+        </div>
+        <div class="property-card">
+          <h3>Threshold, not unanimity</h3>
+          <p>Recovery needs prime&nbsp;+&nbsp;2-of-4 pool, proven by pausing two trustees mid-ceremony and recovering anyway.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:2.5rem;">
+        <table>
+          <thead>
+            <tr><th>Role</th><th>Count</th><th>Holds</th><th>Sees</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Prime trustee</td><td class="mono">1 of 1</td><td>Mask, wrapped to its own key</td><td>Only its own codeword</td></tr>
+            <tr><td>Pool trustee</td><td class="mono">4 total</td><td>An (x, y) point, wrapped to its own key</td><td>Only its own codeword</td></tr>
+            <tr><td>Combiner</td><td class="mono">1</td><td>Ciphertext, wrapped envelopes</td><td>Shards only, never a codeword</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="shortcuts">
+      <p class="eyebrow">Reading this honestly</p>
+      <h2 style="font-size:1.3rem; margin-top:0.5rem;">What the reference demo simplifies</h2>
+      <p class="lede" style="margin-top:0.5rem;">
+        The runnable version of this ceremony (Keycloak + a Flask combiner + five
+        trustee containers) takes deliberate shortcuts for a local walkthrough.
+        None of them are secret — naming them is part of the demo:
+      </p>
+      <div class="shortcuts__grid">
+        <p class="shortcuts__item">Trustee identity is confirmed via Direct Access Grant with a plaintext demo password, standing in for a real interactive OIDC flow.</p>
+        <p class="shortcuts__item">The operator's admin actions are gated by a static shared-secret header, not a modeled Keycloak identity.</p>
+        <p class="shortcuts__item">Keycloak runs in development mode with an embedded database, not a production topology.</p>
+        <p class="shortcuts__item">There's no fingerprint cross-check of the combiner's own bundled public key against Keycloak.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll(".rail__link"));
+    var sections = links
+      .map(function (l) { return document.querySelector(l.getAttribute("href")); })
+      .filter(Boolean);
+
+    if (!("IntersectionObserver" in window) || sections.length === 0) return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var id = "#" + entry.target.id;
+          links.forEach(function (l) {
+            l.classList.toggle("is-active", l.getAttribute("href") === id);
+          });
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+    );
+
+    sections.forEach(function (s) { observer.observe(s); });
+  })();
+</script>

@@ -1,0 +1,11 @@
+.claude/settings.local.json
+__pycache__/
+*.pyc
+dist/
+*.AppImage
+demo/.env
+demo/media/*.mp4
+demo/media/*.gif
+demo/media/dashboard-recording/
+demo/media/dashboard-timeline.json
+demo/media/acts/

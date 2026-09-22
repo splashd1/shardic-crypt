@@ -1,0 +1,3 @@
+trustee-alice_1  | shard submitted for session c566915c-f218-4991-b2aa-b016f51cb28e
+trustee-bob_1    | shard submitted for session c566915c-f218-4991-b2aa-b016f51cb28e
+trustee-carol_1  | shard submitted for session c566915c-f218-4991-b2aa-b016f51cb28e

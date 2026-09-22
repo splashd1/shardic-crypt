@@ -1,0 +1,7 @@
+Creating demo_combiner_1      ... done
+Creating demo_trustee-alice_1 ... done
+Creating demo_trustee-bob_1   ... done
+Creating demo_trustee-carol_1 ... done
+Creating demo_trustee-dave_1  ... done
+Creating demo_trustee-erin_1  ... done
+Creating demo_trustee-frank_1 ... done

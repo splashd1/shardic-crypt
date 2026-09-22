@@ -1,0 +1,28 @@
+{
+    "backup_queue": [
+        "frank"
+    ],
+    "ceremony_id": "85004354-1466-4b8f-80c6-b631324d92e0",
+    "invited": [
+        {
+            "role": "prime",
+            "username": "alice"
+        },
+        {
+            "role": "pool",
+            "username": "bob"
+        },
+        {
+            "role": "pool",
+            "username": "carol"
+        },
+        {
+            "role": "pool",
+            "username": "dave"
+        },
+        {
+            "role": "pool",
+            "username": "erin"
+        }
+    ]
+}

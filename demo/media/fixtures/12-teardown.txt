@@ -1,0 +1,17 @@
+Stopping demo_trustee-alice_1 ... done
+Stopping demo_trustee-bob_1   ... done
+Stopping demo_trustee-carol_1 ... done
+Stopping demo_trustee-dave_1  ... done
+Stopping demo_trustee-erin_1  ... done
+Stopping demo_trustee-frank_1 ... done
+Stopping demo_combiner_1      ... done
+Stopping demo_keycloak_1      ... done
+Removing demo_trustee-alice_1 ... done
+Removing demo_trustee-bob_1   ... done
+Removing demo_trustee-carol_1 ... done
+Removing demo_trustee-dave_1  ... done
+Removing demo_trustee-erin_1  ... done
+Removing demo_trustee-frank_1 ... done
+Removing demo_combiner_1      ... done
+Removing demo_keycloak_1      ... done
+Removing network demo_shardic-demo

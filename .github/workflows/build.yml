@@ -1,0 +1,132 @@
+name: Build VaultTool executables
+
+# Builds standalone executables for Windows and Linux on manual
+# trigger and on release tags. This is the practical way to get a
+# real Windows .exe without owning a Windows machine: PyInstaller
+# can't cross-compile, but GitHub's windows-latest runners can build
+# it for you. Download the artifacts from the workflow run's
+# "Summary" page.
+#
+# Pushing a tag matching v* (e.g. `git tag v1.0.0 && git push --tags`)
+# additionally publishes a GitHub Release with the Windows and Linux
+# build outputs (including both AppImages) attached -- see the
+# `release` job below.
+#
+# Does NOT run on ordinary pushes to main -- each run uploads ~320MB
+# of artifacts (Linux binaries+AppImages ~257MB, Windows exes ~63MB),
+# and at this repo's commit cadence that blew through the 0.5GB
+# included Actions storage quota in a single day. Use
+# workflow_dispatch for an on-demand test build.
+#
+# To use in a different repo: put these files at the paths shown,
+# push, then check the Actions tab.
+#   your-repo/
+#     vault_core.py
+#     vault_create.py
+#     vault_recover.py
+#     vault_gui.py
+#     gf256_sss.py
+#     wordgen.py
+#     kdf.py
+#     krypt_container.py
+#     .github/workflows/build.yml   <- this file
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # needed for the `release` job to create a GitHub Release
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller cryptography argon2-cffi
+      - name: Build GUI exe
+        run: pyinstaller --onefile --windowed --name VaultTool-GUI vault_gui.py
+      - name: Build CLI exes
+        run: |
+          pyinstaller --onefile --name vault-create vault_create.py
+          pyinstaller --onefile --name vault-recover vault_recover.py
+          pyinstaller --onefile --name vault-create-prime vault_create_prime.py
+          pyinstaller --onefile --name vault-recover-prime vault_recover_prime.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VaultTool-windows-x64
+          retention-days: 2
+          path: |
+            dist/VaultTool-GUI.exe
+            dist/vault-create.exe
+            dist/vault-recover.exe
+            dist/vault-create-prime.exe
+            dist/vault-recover-prime.exe
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system + Python dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-tk
+          python -m pip install --upgrade pip
+          pip install pyinstaller cryptography argon2-cffi pillow
+      - name: Build GUI binary
+        run: pyinstaller --onefile --windowed --name VaultTool-GUI vault_gui.py
+      - name: Build CLI binaries
+        run: |
+          pyinstaller --onefile --name vault-create vault_create.py
+          pyinstaller --onefile --name vault-recover vault_recover.py
+          pyinstaller --onefile --name vault-create-prime vault_create_prime.py
+          pyinstaller --onefile --name vault-recover-prime vault_recover_prime.py
+      - name: Package AppImages (CLI + GUI)
+        run: |
+          chmod +x build_appimage.sh
+          ./build_appimage.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VaultTool-linux-x64
+          retention-days: 2
+          path: |
+            dist/VaultTool-GUI
+            dist/vault-create
+            dist/vault-recover
+            dist/vault-create-prime
+            dist/vault-recover-prime
+            dist/VaultTool-x86_64.AppImage
+            dist/VaultToolGUI-x86_64.AppImage
+
+  release:
+    needs: [windows, linux]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: VaultTool-windows-x64
+          path: dist/windows
+      - uses: actions/download-artifact@v4
+        with:
+          name: VaultTool-linux-x64
+          path: dist/linux
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            dist/windows/* dist/linux/* \
+            --title "${{ github.ref_name }}" \
+            --generate-notes

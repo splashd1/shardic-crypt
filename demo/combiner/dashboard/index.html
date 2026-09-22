@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>shardic-envelope — Ceremony Dashboard</title>
+<link rel="stylesheet" href="/dashboard/dashboard.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>shardic-envelope <span class="topbar__subtitle">ceremony dashboard</span></h1>
+  <div class="phase-nav">
+    <button id="phase-prev" class="phase-nav__btn" aria-label="Previous phase">&larr;</button>
+    <div class="phase-nav__tabs">
+      <label class="phase-tab"><input type="radio" name="phase" value="1" checked><span>1 · Formation</span></label>
+      <label class="phase-tab"><input type="radio" name="phase" value="2"><span>2 · Protected &amp; Dormant</span></label>
+      <label class="phase-tab"><input type="radio" name="phase" value="3"><span>3 · Threshold-Proof</span></label>
+      <label class="phase-tab"><input type="radio" name="phase" value="4"><span>4 · Finalize &amp; Verify</span></label>
+    </div>
+    <button id="phase-next" class="phase-nav__btn" aria-label="Next phase">&rarr;</button>
+    <span class="phase-nav__indicator" id="phase-indicator">Phase 1 of 4</span>
+  </div>
+</header>
+
+<div class="layout">
+  <main class="phases">
+
+    <div class="diagram-panel">
+      <svg id="ceremony-diagram" viewBox="0 0 520 360" role="img" aria-label="Ceremony topology: combiner and trustee nodes">
+        <g id="diagram-edges"></g>
+        <g id="diagram-tokens"></g>
+        <g id="diagram-trustees"></g>
+        <g id="diagram-combiner" transform="translate(260,178)">
+          <circle class="combiner-halo" r="54"></circle>
+          <circle class="combiner-body" r="40"></circle>
+          <g class="combiner-icon combiner-icon--lock">
+            <path class="lock-shackle" d="M-9,-4 v-6 a9,9 0 0 1 18,0 v6" />
+            <rect class="lock-body" x="-12" y="-4" width="24" height="18" rx="3" />
+          </g>
+          <g class="combiner-icon combiner-icon--check">
+            <path d="M-11,0 l7,8 l15,-17" />
+          </g>
+          <text class="combiner-label" y="34">combiner</text>
+        </g>
+      </svg>
+    </div>
+
+    <section class="phase" data-phase="1">
+      <h2>Formation</h2>
+      <p class="phase__lede">Each candidate trustee registers a locally-generated keypair with the combiner
+        before any vault exists. Once all five are registered, the operator creates the demo vault: the
+        plaintext is sealed, and each trustee's codeword is wrapped to their own public key — never printed,
+        never stored.</p>
+
+      <div class="callout callout--brass" id="formation-callout" hidden>
+        <strong>Phase 1 complete.</strong> Vault sealed and dormant. This state has no expiry and can sit
+        untouched indefinitely before anyone ever triggers recovery.
+      </div>
+
+      <div class="pipeline" id="formation-pipeline" hidden>
+        <div class="pipeline__row">
+          <div class="pipeline__step">plaintext</div>
+          <div class="pipeline__arrow">AES-256-GCM</div>
+          <div class="pipeline__step">.krypt ciphertext</div>
+        </div>
+        <div class="pipeline__row">
+          <div class="pipeline__step">DEK</div>
+          <div class="pipeline__arrow">Shamir split, GF(256)</div>
+          <div class="pipeline__step" id="formation-split-label">D-of-T envelopes</div>
+        </div>
+        <dl class="pipeline__facts">
+          <dt>Prime trustee</dt><dd id="formation-prime">—</dd>
+          <dt>Pool trustees</dt><dd id="formation-pool">—</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="phase" data-phase="2">
+      <h2>Protected &amp; Dormant</h2>
+      <div class="callout callout--brass">
+        <strong>Sealed.</strong> No single party — including the operator who ran this ceremony — can
+        decrypt the vault alone. Recovery needs the threshold of codewords, held independently by each
+        trustee's own device.
+      </div>
+      <details class="pipeline-recap">
+        <summary>Formation recap</summary>
+        <dl class="pipeline__facts">
+          <dt>Prime trustee</dt><dd id="dormant-prime">—</dd>
+          <dt>Pool trustees</dt><dd id="dormant-pool">—</dd>
+        </dl>
+      </details>
+    </section>
+
+    <section class="phase" data-phase="3">
+      <h2>Threshold-Proof</h2>
+      <p class="phase__lede">A recovery session is open. Each live trustee decrypts its own envelope
+        locally and sends back only the derived shard — the combiner never sees a codeword. Pausing
+        trustees below the threshold doesn't stop recovery.</p>
+
+      <div class="shard-progress" id="shard-progress">
+        <div class="shard-progress__prime">
+          <span class="shard-progress__label">Prime</span>
+          <span id="shard-prime-status" class="shard-dot shard-dot--pending"></span>
+        </div>
+        <div class="shard-progress__pool">
+          <span class="shard-progress__label">Pool (<span id="shard-pool-count">0</span>/<span id="shard-pool-threshold">?</span>)</span>
+          <div id="shard-pool-list" class="shard-progress__pool-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase" data-phase="4">
+      <h2>Finalize &amp; Verify</h2>
+      <div id="verify-banner" class="verify-banner verify-banner--pending">Recovery not yet verified.</div>
+      <dl class="pipeline__facts">
+        <dt>Trustees used</dt><dd id="finalize-trustees">—</dd>
+        <dt>Recovered to</dt><dd id="finalize-outdir">—</dd>
+      </dl>
+    </section>
+
+  </main>
+
+  <aside class="sidebar">
+    <section class="panel">
+      <h3>Presenter controls</h3>
+      <label class="token-field">
+        Operator token
+        <input type="password" id="admin-token" placeholder="Keycloak Bearer token (shardic-operator role)">
+      </label>
+      <div class="controls">
+        <button id="btn-create-vault" disabled>Create Vault</button>
+        <button id="btn-start-recovery" disabled>Start Recovery</button>
+        <button id="btn-finalize" disabled>Finalize</button>
+        <button id="btn-verify" disabled>Verify Match</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Trustees</h3>
+      <div id="trustee-grid" class="trustee-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h3>Ceremony log</h3>
+      <div id="ceremony-log" class="ceremony-log"></div>
+    </section>
+
+    <section class="panel panel--muted">
+      <h3>Demo-only shortcuts</h3>
+      <ul class="shortcut-list">
+        <li>Keycloak runs in dev mode, no Postgres.</li>
+        <li>Trustees authenticate with plaintext demo passwords (Direct Access Grant).</li>
+        <li>Admin routes gated by a static shared-secret header, not a Keycloak identity.</li>
+        <li>Combiner's Keycloak service account has realm-wide <code>view-users</code>.</li>
+        <li>Flask's dev server, not a production WSGI server.</li>
+        <li>No fingerprint cross-check of the combiner's own public key.</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<script src="/dashboard/dashboard.js"></script>
+</body>
+</html>

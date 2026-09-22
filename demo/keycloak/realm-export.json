@@ -1,0 +1,142 @@
+{
+  "realm": "shardic-demo",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      {"name": "shardic-operator"}
+    ]
+  },
+  "groups": [
+    {
+      "name": "shardic-trustees"
+    }
+  ],
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "alice@example.invalid",
+      "firstName": "Alice",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "alice-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "bob@example.invalid",
+      "firstName": "Bob",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "bob-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "carol",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "carol@example.invalid",
+      "firstName": "Carol",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "carol-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "dave",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "dave@example.invalid",
+      "firstName": "Dave",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "dave-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "erin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "erin@example.invalid",
+      "firstName": "Erin",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "erin-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "frank",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "frank@example.invalid",
+      "firstName": "Frank",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "frank-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "grace",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "grace@example.invalid",
+      "firstName": "Grace",
+      "lastName": "Trustee",
+      "credentials": [{"type": "password", "value": "grace-demo-pw1", "temporary": false}],
+      "groups": ["/shardic-trustees"]
+    },
+    {
+      "username": "service-account-shardic-combiner-admin",
+      "enabled": true,
+      "serviceAccountClientId": "shardic-combiner-admin",
+      "clientRoles": {
+        "realm-management": ["view-users"]
+      }
+    },
+    {
+      "username": "operator",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "operator@example.invalid",
+      "firstName": "Demo",
+      "lastName": "Operator",
+      "credentials": [{"type": "password", "value": "operator-demo-pw1", "temporary": false}],
+      "realmRoles": ["shardic-operator"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "shardic-trustee-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": []
+    },
+    {
+      "clientId": "shardic-combiner-admin",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "secret": "combiner-admin-demo-secret1",
+      "redirectUris": []
+    },
+    {
+      "clientId": "shardic-operator-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": []
+    }
+  ]
+}

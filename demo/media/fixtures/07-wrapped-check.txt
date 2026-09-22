@@ -1,0 +1,2 @@
+ls: cannot access '/data/vault/*_trustee_words': No such file or directory
+gone, as expected

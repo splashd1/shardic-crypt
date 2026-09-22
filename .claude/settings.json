@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc *)",
+      "Bash(zip *)",
+      "Bash(unzip *)",
+      "Bash(soffice *)",
+      "Bash(libreoffice *)",
+      "Bash(pdftotext *)",
+      "Bash(pdfinfo *)",
+      "Bash(pdfimages *)",
+      "Bash(pdftoppm *)",
+      "Bash(cp *)",
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(sed *)",
+      "Bash(cd *)",
+      "Bash(python3 *)",
+      "Bash(find *)",
+      "Bash(diff *)",
+      "Bash(wc *)",
+      "Bash(rm /tmp/*)",
+      "Bash(rm -f /tmp/*)",
+      "Bash(rm -r /tmp/*)",
+      "Bash(rm -rf /tmp/*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start-sync.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+combiner  | [notify:ceremony_invite] alice: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'prime', 'ttl_expires_at': 1784653288.5733821}
+combiner  | [notify:ceremony_invite] bob: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'pool', 'ttl_expires_at': 1784653288.5733821}
+combiner  | dave accepted their pool invitation for ceremony 85004354-1466-4b8f-80c6-b631324d92e0
+combiner  | bob accepted their pool invitation for ceremony 85004354-1466-4b8f-80c6-b631324d92e0
+combiner  | alice accepted their prime invitation for ceremony 85004354-1466-4b8f-80c6-b631324d92e0
+combiner  | carol accepted their pool invitation for ceremony 85004354-1466-4b8f-80c6-b631324d92e0
+combiner  | [notify:ceremony_invite] carol: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'pool', 'ttl_expires_at': 1784653288.5733821}
+combiner  | [notify:ceremony_invite] dave: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'pool', 'ttl_expires_at': 1784653288.5733821}
+combiner  | [notify:ceremony_invite] erin: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'pool', 'ttl_expires_at': 1784653288.5733821}
+combiner  | ceremony 85004354-1466-4b8f-80c6-b631324d92e0 initiated by operator operator
+combiner  | 10.89.2.109 - - [21/Jul/2026 17:01:16] "POST /admin/ceremony/initiate HTTP/1.1" 200 -
+combiner  | ceremony 85004354-1466-4b8f-80c6-b631324d92e0: pool invitation to erin expired
+combiner  | ceremony 85004354-1466-4b8f-80c6-b631324d92e0: backfilled pool slot with frank
+combiner  | [notify:ceremony_invite] frank: {'ceremony_id': '85004354-1466-4b8f-80c6-b631324d92e0', 'role': 'pool', 'ttl_expires_at': 1784653310.36577}
+combiner  | frank accepted their pool invitation for ceremony 85004354-1466-4b8f-80c6-b631324d92e0
+combiner  | ceremony 85004354-1466-4b8f-80c6-b631324d92e0 formed -- ready for vault creation

@@ -1,0 +1,12 @@
+{
+    "pool_threshold": 2,
+    "pool_trustees": [
+        "bob",
+        "carol",
+        "dave",
+        "frank"
+    ],
+    "prime_trustee": "alice",
+    "threshold": 3,
+    "vault_id": "23217c73-e714-4146-a3c1-5b3e89bd5bdb"
+}

@@ -1,0 +1,2 @@
+Pausing demo_trustee-dave_1  ... done
+Pausing demo_trustee-frank_1 ... done

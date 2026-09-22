@@ -1,0 +1,2 @@
+trustee-alice_1  | trustee alice: public key fingerprint 8c1b:3f11:afd7:c97a:e6cb:e234:6701:dd72:31e9:48c5:fcad:b434:80dc:7d08:c15b:0ff3
+trustee-alice_1  | registered with combiner: {'fingerprint': '8c1b:3f11:afd7:c97a:e6cb:e234:6701:dd72:31e9:48c5:fcad:b434:80dc:7d08:c15b:0ff3', 'trustee_id': '6e04240d-e125-44ba-b537-852f17bf33f3', 'username': 'alice'}
