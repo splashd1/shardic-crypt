@@ -1,3 +1,38 @@
+# Session notes — 2026-09-24 (Claude Code: white paper v4.1 tightening edit, v4.1 docx/html, a three-deck set aligned to the project's goals, then committed and pushed all outstanding docs)
+
+## What happened
+
+**Note on history:** this repo (`splashd1/shardic-crypt`) is a fork with history reset to one commit (`fcc62f6`). Commit hashes cited in older entries below (e.g. `3a3d265`, `783e12e`) belong to the original repo and don't exist here.
+
+- **White paper v4.1** (`docs/shardic_white_paper.v4.1.md`): user asked for a crisper, less wordy, active-voice, conversational edit of v4.0, with every explicit section/appendix/figure cross-reference (§x.y, "Appendix B", "Figure 8.5") replaced by descriptive ones ("later on", "the codeword appendix", "the security discussion earlier"). Heading numbers, images, tables, code blocks, and all technical claims/numbers kept. About 11% shorter (17.9k → 15.9k words) — wording only, no content cut; the user hasn't asked for a deeper cut. Along the way: fixed typos, fixed "combiner receives only shards" → **unsealed shards** (per the nomenclature skill), and changed Appendix A's "reproduced in full" to "adapted from" `sss_explained_for_shardic.md`, since the text now differs from that file. The only `§` left is a footnote marker.
+- **v4.0 kept unchanged** as the previous edition (md/docx/html all in `docs/`).
+- **v4.1 docx/html** built with the reference-doc pipeline (v4.0 docx as the style template, then `fix_docx.py`: 276 style remaps, 10 orphaned media removed). Rendered and checked: tables are real tables, 52 pages vs v4.0's 58.
+- **Deck set v4.1**, one deck per CLAUDE.md goal, built from scratch with python-pptx in the v3.2 deck's visual style (navy cards, gold labels, the same white icon PNGs):
+  - `shardic_deck_v4_1_overview.pptx` (10 slides) — showing what the tool does; the demo slides use real output from a 3-of-5 vault on `demo/sample-secret` (recovered and diff-identical; a bad codeword rejected).
+  - `shardic_deck_v4_1_foundations.pptx` (14 slides) — teaching the cryptography: naive-split failure → geometry → construction → zero bits → GF(256) → the four ways to protect a shard → zero-leakage indexing → prime → what to keep fixed when integrating.
+  - `shardic_deck_v4_1_conference_talk.pptx` (18 slides) — follows `conference-talk-pitch.md`'s 45-minute outline, with timed speaker notes.
+  - Generators live in `docs/tools/decks/` (`deckkit.py` + three deck scripts + `icons/` + `build.sh`). Rebuilding reproduces the committed decks byte-for-byte except `docProps/core.xml` timestamps. **Edit the scripts, not the .pptx.** No node/pptxgenjs on this machine — python-pptx in a venv.
+- **Commits, all pushed to `origin/main`** (`fcc62f6..92009d9`):
+  - `7e4f204` v4.1 trio + v4.0 trio + decks
+  - `17a5f2f` deck scripts
+  - `5ee9a0e` v3.2 white paper trio moved to `docs/archive/`
+  - `3011948` the user's pending docs committed as-is: CLAUDE.md goals, README, `conference-talk-pitch.md`, `public-education-explainer.md`, embedment/crypto-path repointed to v4.0
+  - `92009d9` all references moved to v4.1 and the new decks; `shardic-cryptographic-path.docx/.html` regenerated (plain pandoc) — they were stale (said v3.2, predated share→shard, lacked the key-custody table)
+
+## State at end
+
+Everything pushed except `assistant.py` and `webapp.py`, which are still untracked code, deliberately left alone.
+
+## Possibly worth following up
+
+- **Security:** the `origin` remote URL has a GitHub PAT written into it (`https://splashd1:ghp_…@github.com/...`), and it appeared in session output. Recommended revoking it and switching to a credential helper or SSH — not yet confirmed done.
+- The talk deck's title slide still has `[Speaker name] · [Venue, date]` placeholders.
+- `shardic_deck_v3_2.pptx` (36 slides) is still in `docs/` as the previous companion deck; archiving it was offered, not done.
+- The v4.0 trio stays in `docs/` "for now", per the user — archive it once v4.1 is settled.
+- If a deeper v4.1 cut is wanted, it would mean removing content, not just rewording.
+
+---
+
 # Session notes — 2026-09-11 (Claude Code: full repo cleanup — archived superseded whitepaper/deck versions, untracked stray build binaries, expanded README's file list, then packaged and delivered a zip of the repo)
 
 ## What happened
