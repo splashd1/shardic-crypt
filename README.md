@@ -45,6 +45,65 @@ These two are just illustrations — see [Other potential use
 cases](#other-potential-use-cases) below for a broader list spanning
 government and business scenarios.
 
+## Why this project exists
+
+Beyond being a working tool, shardic is maintained as a public,
+open explanation of a specific idea: that "no single party can act
+alone" is enforceable in the math itself, not just in policy. Three
+goals sit behind everything in this repo:
+
+1. **Inform and share the utility** — this README, the CLI/GUI, and
+   the demo combiner exist so anyone can run threshold-recoverable
+   encryption themselves and see the guarantee hold, rather than take
+   it on faith.
+2. **Public education on the underlying cryptographic foundation** —
+   the `docs/` directory documents Shamir's Secret Sharing, the
+   `.krypt` format, and the full DEK-formation-through-recovery path
+   at increasing levels of depth (see [Learn the cryptographic
+   foundation](#learn-the-cryptographic-foundation) below), written so
+   the design is reusable and auditable by other teams considering it
+   as a building block for their own multi-entity security capability
+   — human-only, or human-and-AI (see `docs/spac-concept.md` and
+   §6.4–§6.5 of the white paper for that extension).
+3. **Evangelizing the approach** — presenting the scientific basis and
+   technical workflow at security conferences, so "threshold
+   recoverability by construction" becomes a familiar option architects
+   reach for, not a novelty. See
+   `docs/conference-talk-pitch.md` for the current talk pitch/outline.
+
+None of this changes what's actually implemented or how it works —
+see "Things worth knowing before you rely on this" below for the
+project's own honest limits.
+
+### Learn the cryptographic foundation
+
+Ordered from most to least accessible:
+
+- **New to threshold cryptography?** Start with
+  `docs/public-education-explainer.md` — a plain-language walkthrough
+  of the problem shardic solves and why splitting a secret
+  mathematically (not just physically) is what makes it work, aimed
+  at readers with no cryptography background.
+- **Want the SSS math specifically?** `docs/sss_explained_for_shardic.md`
+  builds Shamir's Secret Sharing from the ground up — the polynomial
+  intuition, the GF(256) field, Lagrange interpolation — as its own
+  standalone explainer (also reproduced as Appendix A of the white
+  paper below).
+- **Want it at the level of actual function calls?**
+  `docs/shardic-cryptographic-path.md` traces every cryptographic
+  operation from DEK formation through recovery against the real code
+  (`gf256_sss.py`, `vault_core.py`, `kdf.py`, `krypt_container.py`,
+  `shardic_envelope_crypto.py`), across the base scheme,
+  shardic-prime, and shardic-envelope.
+- **Want the full treatment across all three levels?**
+  `docs/shardic_white_paper.v4.0.md` (also as `.html`/`.docx` in
+  `docs/`) covers shardic at three cumulative levels of
+  implementation — personal/small-group utility, shardic ceremony for
+  system security integration, and SPAC for product protection —
+  plus `docs/shardic_deck_v3_2.pptx`, the companion slide deck (still
+  tracking the prior v3.2 structure; not yet updated for v4.0's
+  three-level framing).
+
 ## Files
 - `vault_create.py` — CLI Program 1: archive → encrypt → split into trustee codewords → single `.krypt` file
 - `vault_recover.py` — CLI Program 2: recover DEK from D codewords → decrypt → extract
@@ -108,8 +167,8 @@ government and business scenarios.
   unchanged from today).
 - [`docs/shardic-envelope-explainer.html`](docs/shardic-envelope-explainer.html) — a static, illustrated walkthrough of the shardic-envelope ceremony's four phases (Formation, Protected & Dormant, Threshold-Proof, Finalize & Verify), for anyone who can't run the live `demo/` stack. Open it directly in a browser.
 - [`docs/nomenclature.md`](docs/nomenclature.md) — the canonical glossary and lifecycle-state vocabulary for shardic's domain objects (vault, shard, unsealed shard, trustee, combiner, etc.), grounded in actual code usage. Also available as a Claude Code skill (`.claude/skills/shardic-nomenclature/`) that loads automatically for naming-sensitive work.
-- [`docs/sss_explained_for_shardic.md`](docs/sss_explained_for_shardic.md) — a standalone, complete explainer of Shamir's Secret Sharing: the geometric intuition, the precise polynomial construction, why the arithmetic runs over GF(256), and how shardic builds on it. The white paper's §1.4 gives a shorter in-context version of the same intuition before §3.2's mechanics; this is the full reference.
-- [`docs/shardic_white_paper.v3.2.md`](docs/shardic_white_paper.v3.2.md) — the shardic white paper: motivation, operator walkthroughs, the underlying cryptographic mechanics, and a security discussion of trade-offs (including shardic-envelope's impact). Rendered `.docx`/`.html` twins live alongside it; superseded drafts (v1.2 through v3.1) are kept in `docs/archive/` for history.
+- [`docs/sss_explained_for_shardic.md`](docs/sss_explained_for_shardic.md) — a standalone, complete explainer of Shamir's Secret Sharing: the geometric intuition, the precise polynomial construction, why the arithmetic runs over GF(256), and how shardic builds on it. The white paper's §1.4 gives a shorter in-context version of the same intuition before §4.2's mechanics; this is the full reference.
+- [`docs/shardic_white_paper.v4.0.md`](docs/shardic_white_paper.v4.0.md) — the shardic white paper: motivation; §2's overview of shardic's three cumulative levels of implementation (personal/small-group utility, shardic ceremony for system security integration, and SPAC for product protection); each level's operator walkthroughs and cryptographic mechanics in turn; and a security discussion of trade-offs (including shardic-envelope's impact). Rendered `.docx`/`.html` twins live alongside it; superseded drafts (v1.2 through v3.2) are kept in `docs/archive/` for history.
 - [`docs/feedback-on-v3.2.md`](docs/feedback-on-v3.2.md) — section-by-section accuracy/formatting/readability review of the v3.2 draft against v3.1.
 - [`docs/sss_explained_for_shardic.md`](docs/sss_explained_for_shardic.md)'s companion: [`docs/gf256-field-construction.md`](docs/gf256-field-construction.md) — supplemental detail on why GF(256) uses reduction polynomial `0x11B` and generator `3` specifically, referenced from `gf256_sss.py`'s docstring.
 - [`docs/shardic-cryptographic-path.md`](docs/shardic-cryptographic-path.md) (+ `.docx`/`.html` twins) — a code-grounded reference walking DEK formation through recovery at the level of actual function names and data shapes, across the base scheme, shardic-prime, and shardic-envelope; complements the white paper's conceptual Appendix A rather than duplicating it.

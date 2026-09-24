@@ -11,7 +11,7 @@ proposal** rather than shipped code, it's flagged explicitly, matching
 the white paper's own Implemented/Design Proposal convention.
 
 This document complements rather than duplicates the white paper's
-**Appendix A** (`docs/shardic_white_paper.v3.2.md` /
+**Appendix A** (`docs/shardic_white_paper.v4.0.md` /
 `docs/sss_explained_for_shardic.md`): Appendix A stays at the
 conceptual level (why SSS works, no code); this document covers the
 same ground plus shardic-envelope and SPAC at the level of actual

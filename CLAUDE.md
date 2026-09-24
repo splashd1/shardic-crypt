@@ -14,6 +14,32 @@ build steps, and design rationale. This file is for the things a new
 Claude Code session needs to *not re-derive from scratch* or
 *re-break by accident*.
 
+## Current project direction (as of 2026-09-21)
+
+The working goal for this repo has been explicitly reframed by the
+user away from "ship a tool" and toward three outcomes, in this
+priority order — don't silently narrow scope back to just the CLI/GUI
+without checking:
+
+1. **Inform and share the utility** — the tool itself, kept usable and
+   demoable, as proof the guarantee is real.
+2. **Public education** — sharing the shardic cryptographic foundation
+   openly enough that other teams can evaluate or integrate it as a
+   building block for their own multi-entity security capability
+   (human-only, or human+AI per `docs/spac-concept.md`). See
+   README's "Why this project exists" / "Learn the cryptographic
+   foundation" sections and `docs/public-education-explainer.md`.
+3. **Evangelism** — presenting the scientific basis and technical
+   workflow at cyber-related conferences. `docs/conference-talk-pitch.md`
+   is the current talk pitch/outline; keep it in sync with the white
+   paper if the underlying claims change.
+
+Practical implication for future sessions: when asked to add or revise
+project material, default to *also* asking "does this belong in the
+education/evangelism docs, not just the code" — this project's
+audience now explicitly includes people who will never run the CLI,
+only read about it or hear a talk on it.
+
 ## Architecture (don't duplicate crypto logic across frontends)
 
 - `gf256_sss.py` — Shamir split/reconstruct over GF(256). Self-tests
