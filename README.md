@@ -96,13 +96,15 @@ Ordered from most to least accessible:
   `shardic_envelope_crypto.py`), across the base scheme,
   shardic-prime, and shardic-envelope.
 - **Want the full treatment across all three levels?**
-  `docs/shardic_white_paper.v4.0.md` (also as `.html`/`.docx` in
+  `docs/shardic_white_paper.v4.1.md` (also as `.html`/`.docx` in
   `docs/`) covers shardic at three cumulative levels of
   implementation — personal/small-group utility, shardic ceremony for
-  system security integration, and SPAC for product protection —
-  plus `docs/shardic_deck_v3_2.pptx`, the companion slide deck (still
-  tracking the prior v3.2 structure; not yet updated for v4.0's
-  three-level framing).
+  system security integration, and SPAC for product protection.
+  Three companion decks go with it, one per audience:
+  `docs/shardic_deck_v4_1_overview.pptx` (what it does, with a live
+  demo), `docs/shardic_deck_v4_1_foundations.pptx` (the cryptography,
+  step by step), and `docs/shardic_deck_v4_1_conference_talk.pptx`
+  (a 45-minute talk with speaker notes).
 
 ## Files
 - `vault_create.py` — CLI Program 1: archive → encrypt → split into trustee codewords → single `.krypt` file
@@ -168,7 +170,7 @@ Ordered from most to least accessible:
 - [`docs/shardic-envelope-explainer.html`](docs/shardic-envelope-explainer.html) — a static, illustrated walkthrough of the shardic-envelope ceremony's four phases (Formation, Protected & Dormant, Threshold-Proof, Finalize & Verify), for anyone who can't run the live `demo/` stack. Open it directly in a browser.
 - [`docs/nomenclature.md`](docs/nomenclature.md) — the canonical glossary and lifecycle-state vocabulary for shardic's domain objects (vault, shard, unsealed shard, trustee, combiner, etc.), grounded in actual code usage. Also available as a Claude Code skill (`.claude/skills/shardic-nomenclature/`) that loads automatically for naming-sensitive work.
 - [`docs/sss_explained_for_shardic.md`](docs/sss_explained_for_shardic.md) — a standalone, complete explainer of Shamir's Secret Sharing: the geometric intuition, the precise polynomial construction, why the arithmetic runs over GF(256), and how shardic builds on it. The white paper's §1.4 gives a shorter in-context version of the same intuition before §4.2's mechanics; this is the full reference.
-- [`docs/shardic_white_paper.v4.0.md`](docs/shardic_white_paper.v4.0.md) — the shardic white paper: motivation; §2's overview of shardic's three cumulative levels of implementation (personal/small-group utility, shardic ceremony for system security integration, and SPAC for product protection); each level's operator walkthroughs and cryptographic mechanics in turn; and a security discussion of trade-offs (including shardic-envelope's impact). Rendered `.docx`/`.html` twins live alongside it; superseded drafts (v1.2 through v3.2) are kept in `docs/archive/` for history.
+- [`docs/shardic_white_paper.v4.1.md`](docs/shardic_white_paper.v4.1.md) — the shardic white paper (current edition): motivation; §2's overview of shardic's three cumulative levels of implementation (personal/small-group utility, shardic ceremony for system security integration, and SPAC for product protection); each level's operator walkthroughs and cryptographic mechanics in turn; and a security discussion of trade-offs (including shardic-envelope's impact). Rendered `.docx`/`.html` twins live alongside it. v4.1 is a tightened, active-voice edit of v4.0 that swaps explicit section references for descriptive ones; the v4.0 trio (`shardic_white_paper.v4.0.md` / `.docx` / `.html`) stays in `docs/` as the previous edition for now. Superseded drafts (v1.2 through v3.2) are kept in `docs/archive/` for history.
 - [`docs/feedback-on-v3.2.md`](docs/feedback-on-v3.2.md) — section-by-section accuracy/formatting/readability review of the v3.2 draft against v3.1.
 - [`docs/sss_explained_for_shardic.md`](docs/sss_explained_for_shardic.md)'s companion: [`docs/gf256-field-construction.md`](docs/gf256-field-construction.md) — supplemental detail on why GF(256) uses reduction polynomial `0x11B` and generator `3` specifically, referenced from `gf256_sss.py`'s docstring.
 - [`docs/shardic-cryptographic-path.md`](docs/shardic-cryptographic-path.md) (+ `.docx`/`.html` twins) — a code-grounded reference walking DEK formation through recovery at the level of actual function names and data shapes, across the base scheme, shardic-prime, and shardic-envelope; complements the white paper's conceptual Appendix A rather than duplicating it.
@@ -177,7 +179,8 @@ Ordered from most to least accessible:
 - [`docs/icd-wire-format-draft.md`](docs/icd-wire-format-draft.md) — design proposal, unimplemented review draft: the actual wire-format contract at the shardic client-module boundary that `embedment-manual.md` leaves open.
 - [`docs/shardware-token.md`](docs/shardware-token.md), [`docs/shardware-token-embed-extract.md`](docs/shardware-token-embed-extract.md), [`docs/shardware-token-key-custody.md`](docs/shardware-token-key-custody.md) — design proposals (nothing implemented): a family of hardware-token alternatives to a memorized codeword — physical carriage, PUF-sealed embed/extract with vault-signed authorization, and hardware-backed key custody, respectively.
 - [`docs/dlt-integration-brainstorm.md`](docs/dlt-integration-brainstorm.md) — **tabled**: an unscoped, uncommitted brainstorm on blockchain/hashgraph integration, kept only so the idea isn't lost.
-- `docs/shardic_deck_v3_2.pptx` — the current companion slide deck, realigned to the v3.2 whitepaper. No markdown source; edited directly as OOXML (see the `shardic-doc-pipeline` Claude Code skill's pptx XML-surgery workflow).
+- `docs/shardic_deck_v4_1_overview.pptx`, `docs/shardic_deck_v4_1_foundations.pptx`, `docs/shardic_deck_v4_1_conference_talk.pptx` — the current v4.1 deck set, one per project goal: showing what the tool does (10 slides, including a real create/recover demo), teaching the cryptography (14 slides), and presenting at conferences (18 slides with timed speaker notes, following `docs/conference-talk-pitch.md`). Generated by the scripts in `docs/tools/decks/` (`build.sh` rebuilds all three) — edit the scripts, not the `.pptx` files.
+- `docs/shardic_deck_v3_2.pptx` — the previous 36-slide companion deck, aligned to the v3.2 whitepaper. No markdown source; edited directly as OOXML (see the `shardic-doc-pipeline` Claude Code skill's pptx XML-surgery workflow).
 - `docs/archive/` — superseded whitepaper drafts (v1.2–v3.1jd) and old deck/presentation files, kept for history but out of the live document set.
 - `docs/media/` — figures embedded in the whitepaper and other docs; `docs/tools/fix_docx.py` — post-processes pandoc's docx output to fix two recurring regen bugs (dangling Word styles, duplicated embedded media) — see the `shardic-doc-pipeline` Claude Code skill.
 - `demo/` — a live, containerized shardic-prime + shardic-envelope stack (Keycloak-backed combiner/trustee services, docker-compose); see [`demo/README.md`](demo/README.md) for setup and the full walkthrough.

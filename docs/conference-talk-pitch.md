@@ -3,7 +3,7 @@
 **Status: living pitch document.** This is the current CFP-ready
 abstract, outline, and pitch material for presenting shardic at
 security/cryptography-adjacent conferences. Keep it in sync with
-`shardic_white_paper.v4.0.md` if the underlying claims (what's
+`shardic_white_paper.v4.1.md` if the underlying claims (what's
 implemented vs. proposed, the three-level structure) change — this
 document borrows its claims from there rather than re-deriving them,
 so a drift check when the white paper revs is the main maintenance
@@ -115,8 +115,9 @@ Security-generalist and applied-crypto tracks are the best fit; AI-governance-ad
 ## Supporting materials to bring/link
 
 - This repo + README (working code, install-and-run).
-- `docs/shardic_white_paper.v4.0.md` / `.html` / `.docx` — full paper for attendees who want the complete argument across all three levels of implementation.
-- `docs/shardic_deck_v3_2.pptx` — companion slide deck; adapt/trim per talk length rather than presenting all of it.
+- `docs/shardic_white_paper.v4.1.md` / `.html` / `.docx` — full paper for attendees who want the complete argument across all three levels of implementation.
+- `docs/shardic_deck_v4_1_conference_talk.pptx` — the talk deck for this outline (18 slides, timed speaker notes keyed to the 45-minute segments above); fill in the speaker/venue placeholder on the title slide. For a 25-minute slot, drop the SPAC/human-AI slides to a single mention.
+- `docs/shardic_deck_v4_1_overview.pptx` and `docs/shardic_deck_v4_1_foundations.pptx` — shorter demo and deeper cryptography decks, useful as backup slides or leave-behinds.
 - `docs/sss_explained_for_shardic.md` — the standalone SSS build-up this talk's middle section mirrors.
 - `docs/public-education-explainer.md` — the non-technical version, useful as a leave-behind/blog cross-post for attendees who want to send it to a non-cryptographer colleague.
 

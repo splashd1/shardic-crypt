@@ -254,7 +254,7 @@ than shipped code, it’s flagged explicitly, matching the white paper’s
 own Implemented/Design Proposal convention.</p>
 <p>This document complements rather than duplicates the white paper’s
 <strong>Appendix A</strong>
-(<code>docs/shardic_white_paper.v3.2.md</code> /
+(<code>docs/shardic_white_paper.v4.1.md</code> /
 <code>docs/sss_explained_for_shardic.md</code>): Appendix A stays at the
 conceptual level (why SSS works, no code); this document covers the same
 ground plus shardic-envelope and SPAC at the level of actual function
@@ -295,7 +295,7 @@ holds it intact.</p>
 <h3 id="splitting-the-dek-the-sss-secret-is-the-dek">1.3 Splitting the
 DEK: the SSS secret <em>is</em> the DEK</h3>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>shares <span class="op">=</span> split_secret(dek, threshold<span class="op">=</span>threshold, total_shares<span class="op">=</span>trustees)</span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>shards <span class="op">=</span> split_secret(dek, threshold<span class="op">=</span>threshold, total_shards<span class="op">=</span>trustees)</span></code></pre></div>
 <p><code>gf256_sss.py</code> implements byte-wise Shamir’s Secret
 Sharing over GF(2⁸) — the same field AES itself uses (generator
 <code>3</code>, reduction polynomial <code>0x11B</code>). The DEK is
@@ -307,9 +307,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <p>Each trustee’s index <code>x</code> (1..T) yields a 32-byte vector
 <code>y = (p₀(x), …, p₃₁(x))</code> — the value of every one of those 32
 polynomials at that trustee’s x-coordinate. The pair <code>(x, y)</code>
-is the trustee’s <strong>share</strong>.</p>
+is the trustee’s <strong>shard</strong>.</p>
 <p>This is where the Shamir guarantee applies directly to the DEK: any
-<code>D</code> shares uniquely determine all 32 constant terms via
+<code>D</code> shards uniquely determine all 32 constant terms via
 Lagrange interpolation; any <code>D − 1</code> leave every possible byte
 value equally likely — genuinely zero information, not merely expensive
 to break. <strong>There is no key-encryption key here.</strong> Wrapping
@@ -317,38 +317,38 @@ the DEK under a separate key before splitting <em>that</em> key would
 only relocate the single point of control (exactly the failure mode the
 white paper’s §1.1 argues against in general) — splitting the DEK itself
 is what actually removes it.</p>
-<h3 id="protecting-each-share-with-a-codeword">1.4 Protecting each share
+<h3 id="protecting-each-shard-with-a-codeword">1.4 Protecting each shard
 with a codeword</h3>
-<p>A share is useless to whoever holds only the <code>.krypt</code>
+<p>A shard is useless to whoever holds only the <code>.krypt</code>
 container — it also needs its owning trustee’s codeword:</p>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>salt <span class="op">=</span> secrets.token_bytes(<span class="dv">16</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>share_key <span class="op">=</span> kdfmod.derive_key(kdf_method, kdf_params, codeword, salt)   <span class="co"># PBKDF2-HMAC-SHA256 or Argon2id</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>share_nonce <span class="op">=</span> secrets.token_bytes(<span class="dv">12</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>shard_key <span class="op">=</span> kdfmod.derive_key(kdf_method, kdf_params, codeword, salt)   <span class="co"># PBKDF2-HMAC-SHA256 or Argon2id</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>shard_nonce <span class="op">=</span> secrets.token_bytes(<span class="dv">12</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>payload <span class="op">=</span> <span class="bu">bytes</span>([x]) <span class="op">+</span> y</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>share_ct <span class="op">=</span> AESGCM(share_key).encrypt(share_nonce, payload, associated_data<span class="op">=</span><span class="va">None</span>)</span></code></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>shard_ct <span class="op">=</span> AESGCM(shard_key).encrypt(shard_nonce, payload, associated_data<span class="op">=</span><span class="va">None</span>)</span></code></pre></div>
 <p>The codeword (memorable, dictionary, or synthetic mode) is stretched
 through a KDF — PBKDF2-HMAC-SHA256 at 400,000 iterations by default, or
 Argon2id (256 MiB / t=4 / p=4) if available — into a 256-bit
-<code>share_key</code>, independently salted per share. That key
-AES-256-GCM encrypts the share’s <code>(x, y)</code> payload. A share is
+<code>shard_key</code>, independently salted per shard. That key
+AES-256-GCM encrypts the shard’s <code>(x, y)</code> payload. A shard is
 therefore protected twice over: it exists only inside ciphertext that
 itself requires a KDF-stretched codeword to open.</p>
-<p>Share records are then randomly shuffled
+<p>Shard records are then randomly shuffled
 (<code>secrets.SystemRandom().shuffle</code>) before being written —
-nothing in the container ties a given encrypted share to a given trustee
+nothing in the container ties a given encrypted shard to a given trustee
 or codeword. That property is what makes the trial-matching recovery
 step below necessary, not incidental.</p>
 <h3 id="packaging-the-.krypt-container">1.5 Packaging: the
 <code>.krypt</code> container</h3>
 <p>Metadata (KDF method/params, <code>T</code>, <code>D</code>, the
-shuffled share records, the archive’s nonce) and the raw archive
+shuffled shard records, the archive’s nonce) and the raw archive
 ciphertext are written as one file: magic header, length-prefixed JSON
 metadata, raw ciphertext — no base64 (avoids the ~33% size penalty),
 nothing to accidentally separate.</p>
 <h3 id="recovery">1.6 Recovery</h3>
 <p>A trustee supplies their codeword. For <strong>every</strong>
-still-unmatched share record, the recovery path re-derives a candidate
+still-unmatched shard record, the recovery path re-derives a candidate
 key from that codeword against that record’s own stored salt, and
 attempts a decrypt:</p>
 <div class="sourceCode" id="cb6"><pre
@@ -357,21 +357,21 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a hr
 <p>GCM’s tag is the correctness oracle — there is no lookup table, no
 “which record is mine,” just trial and error with a hard yes/no per
 attempt. Whichever record’s tag validates is that trustee’s actual
-share; its first byte is <code>x</code>, the rest is <code>y</code>.</p>
-<p>Once <code>D</code> shares are recovered, Lagrange interpolation at
+shard; its first byte is <code>x</code>, the rest is <code>y</code>.</p>
+<p>Once <code>D</code> shards are recovered, Lagrange interpolation at
 <code>x = 0</code>, performed independently per byte position,
 recombines them:</p>
 <div class="sourceCode" id="cb7"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dek <span class="op">=</span> reconstruct_secret(recovered_shares)</span></code></pre></div>
-<p>For each byte position: for every recovered share <code>i</code>,
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dek <span class="op">=</span> reconstruct_secret(recovered_shards)</span></code></pre></div>
+<p>For each byte position: for every recovered shard <code>i</code>,
 multiply its <code>y</code> byte by <code>∏(xⱼ) / ∏(xᵢ ⊕ xⱼ)</code>
-across all other recovered shares <code>j</code>, then XOR the 32
-per-share contributions together. Repeat for all 32 positions and the
+across all other recovered shards <code>j</code>, then XOR the 32
+per-shard contributions together. Repeat for all 32 positions and the
 original DEK falls out exactly.</p>
 <div class="sourceCode" id="cb8"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plaintext <span class="op">=</span> AESGCM(dek).decrypt(archive_nonce, ciphertext, associated_data<span class="op">=</span><span class="va">None</span>)</span></code></pre></div>
-<p>If the recombined DEK is wrong — insufficient shares, mismatched
-shares, tampering — this raises <code>InvalidTag</code> and stops
+<p>If the recombined DEK is wrong — insufficient shards, mismatched
+shards, tampering — this raises <code>InvalidTag</code> and stops
 outright, never producing a partial or corrupted extraction. On success,
 the tar is extracted and the vault is recovered.</p>
 <h3 id="two-key-layers-not-one">1.7 Two key layers, not one</h3>
@@ -398,8 +398,9 @@ the tar is extracted and the vault is recovered.</p>
 <td>Nobody, post-split; reconstructed only transiently at recovery</td>
 </tr>
 <tr>
-<td>Share protection</td>
-<td>One SSS share (a fragment of the DEK)</td>
+<td>Shard protection</td>
+<td>One SSS shard (a point on the DEK’s Shamir polynomial, not a
+fragment of the DEK’s bytes)</td>
 <td>A per-trustee key derived from a codeword via PBKDF2/Argon2id</td>
 <td>Implicitly, via the trustee’s held codeword</td>
 </tr>
@@ -420,7 +421,7 @@ with a random mask first, then splits the <em>masked</em> value:</p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> secrets.token_bytes(<span class="dv">32</span>)                 <span class="co"># same length as the DEK</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>masked_secret <span class="op">=</span> <span class="bu">bytes</span>(a <span class="op">^</span> b <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(dek, mask))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>pool_shares <span class="op">=</span> split_secret(masked_secret, threshold<span class="op">=</span>pool_threshold, total_shares<span class="op">=</span>pool_size)</span></code></pre></div>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>pool_shards <span class="op">=</span> split_secret(masked_secret, threshold<span class="op">=</span>pool_threshold, total_shards<span class="op">=</span>pool_size)</span></code></pre></div>
 <p>The <strong>prime trustee</strong>’s codeword protects
 <code>mask</code> directly — there is no polynomial for the prime slot;
 it’s an all-or-nothing pad, not a Shamir point. Every other trustee is
@@ -428,20 +429,20 @@ an ordinary <strong>pool trustee</strong>, interchangeable among
 themselves the same way base-scheme trustees are. <code>T</code> and
 <code>D</code> count the prime trustee: <code>pool_size = T − 1</code>,
 <code>pool_threshold = D − 1</code>.</p>
-<p>Without <code>mask</code>, no number of pool shares — even all of
+<p>Without <code>mask</code>, no number of pool shards — even all of
 them — reveals anything about the DEK: <code>masked_secret</code> is
 uniformly random without it. Without at least
-<code>pool_threshold</code> pool shares, <code>mask</code> alone reveals
+<code>pool_threshold</code> pool shards, <code>mask</code> alone reveals
 nothing either. Both halves keep the base scheme’s information-theoretic
 guarantee; the pad is what makes the prime trustee’s participation
 non-negotiable rather than merely encouraged.</p>
-<h3 id="share-sealing-and-container-differences">2.2 Share sealing and
+<h3 id="shard-sealing-and-container-differences">2.2 Shard sealing and
 container differences</h3>
 <p>Each value — <code>mask</code> for the prime trustee,
 <code>(x, y)</code> for each pool trustee — is sealed exactly like a
-base-scheme share: a per-record salt, a codeword run through the same
+base-scheme shard: a per-record salt, a codeword run through the same
 KDF choice, AES-256-GCM. A one-byte type tag
-(<code>SHARE_TYPE_PRIME</code> / <code>SHARE_TYPE_POOL</code>) rides
+(<code>SHARD_TYPE_PRIME</code> / <code>SHARD_TYPE_POOL</code>) rides
 inside the encrypted payload itself, not in the container’s visible
 structure, so a codeword’s role — prime or pool — is only learned once
 it actually matches a record. Records are shuffled together the same way
@@ -451,9 +452,9 @@ as the base scheme.</p>
 now also reveals whether the matched record was the prime’s
 <code>mask</code> or a pool <code>(x, y)</code> point. Reconstruction
 requires the prime’s <code>mask</code> <strong>and</strong> at least
-<code>pool_threshold</code> pool shares:</p>
+<code>pool_threshold</code> pool shards:</p>
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>masked_secret <span class="op">=</span> reconstruct_secret(pool_shares)      <span class="co"># ordinary Lagrange interpolation, §1.6</span></span>
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>masked_secret <span class="op">=</span> reconstruct_secret(pool_shards)      <span class="co"># ordinary Lagrange interpolation, §1.6</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>dek <span class="op">=</span> <span class="bu">bytes</span>(a <span class="op">^</span> b <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(masked_secret, mask))</span></code></pre></div>
 <p>Missing the prime trustee’s codeword, no quantity of pool codewords —
 even all of them — recovers the vault. This is the mechanism, not a
@@ -486,44 +487,44 @@ distinct moments</strong>, never confuse them:</p>
 <p><strong>Codeword envelope (combiner → trustee), at vault
 creation.</strong> The combiner still generates a plain-text codeword
 and runs <code>create_vault_prime()</code> exactly as in §2 — nothing
-about DEK splitting or share sealing changes. What changes is delivery:
+about DEK splitting or shard sealing changes. What changes is delivery:
 instead of an operator handing that codeword to a trustee out of band,
 the combiner wraps it to the trustee’s already-registered public key —
 <code>shardic_envelope_crypto.wrap(codeword.encode(), recipient_pub)</code>
 — and the trustee retrieves it by polling
 <code>GET /trustees/pending-envelope</code>. The combiner never persists
 a plaintext codeword once this happens.</p>
-<p><strong>Shard envelope (trustee → combiner), at recovery.</strong>
-The trustee unwraps their codeword envelope locally, then runs the
-<em>same</em> trial-matching logic from §1.6/§2.3
+<p><strong>Unsealed shard envelope (trustee → combiner), at
+recovery.</strong> The trustee unwraps their codeword envelope locally,
+then runs the <em>same</em> trial-matching logic from §1.6/§2.3
 (<code>try_match_word_prime</code>) against their own copy of the vault
-to derive their <strong>shard</strong> — the prime’s <code>mask</code>,
-or a pool trustee’s <code>(x, y)</code> point. A shard only exists after
-a codeword has already matched a share; it is a <em>result</em>, never a
-delivery mechanism, and never a codeword itself. That shard is
-serialized —</p>
+to derive their <strong>unsealed shard</strong> — the prime’s
+<code>mask</code>, or a pool trustee’s <code>(x, y)</code> point. An
+unsealed shard only exists after a codeword has already matched a shard;
+it is a <em>result</em>, never a delivery mechanism, and never a
+codeword itself. That unsealed shard is serialized —</p>
 <div class="sourceCode" id="cb12"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="st">b&quot;P&quot;</span> <span class="op">+</span> mask                    <span class="co"># prime shard: 33 bytes</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">b&quot;L&quot;</span> <span class="op">+</span> <span class="bu">bytes</span>([x]) <span class="op">+</span> y_bytes    <span class="co"># pool shard: 34 bytes</span></span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="st">b&quot;P&quot;</span> <span class="op">+</span> mask                    <span class="co"># prime unsealed shard: 33 bytes</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">b&quot;L&quot;</span> <span class="op">+</span> <span class="bu">bytes</span>([x]) <span class="op">+</span> y_bytes    <span class="co"># pool unsealed shard: 34 bytes</span></span></code></pre></div>
 <p>— and wrapped back to the combiner’s public key, which the trustee
 already has: it rides along in the same API response as the codeword
 envelope (<code>combiner_pub</code>), so no separate lookup is needed
 for the reply. The combiner unwraps and deserializes it, and by
 construction <strong>never sees a plaintext codeword at any
-point</strong> — only a shard, already matched, already reduced to
-exactly the bytes needed for reconstruction.</p>
+point</strong> — only an unsealed shard, already matched, already
+reduced to exactly the bytes needed for reconstruction.</p>
 <h3 id="what-shardic-envelope-deliberately-does-not-change">3.3 What
 shardic-envelope deliberately does not change</h3>
 <p>Straight from the module’s own docstring: it “never touches
 <code>gf256_sss_prime.py</code>’s split/reconstruct math or
-<code>vault_core_prime.py</code>’s KDF/share logic — those stay exactly
+<code>vault_core_prime.py</code>’s KDF/shard logic — those stay exactly
 as they are.” Envelope is a transport-confidentiality layer composed
 <em>on top of</em> shardic-prime in the current implementation, not a
 fourth, independent way of splitting or protecting the DEK. The
-<code>.krypt</code> container’s share records are still
+<code>.krypt</code> container’s shard records are still
 codeword-KDF-AES-GCM-sealed exactly as in §2.2; envelope only changes
-how the codeword reaches the trustee and how the resulting shard gets
-back, never what’s stored at rest.</p>
+how the codeword reaches the trustee and how the resulting unsealed
+shard gets back, never what’s stored at rest.</p>
 <h3 id="identity-not-secrecy-fingerprint">3.4 Identity, not secrecy:
 <code>fingerprint()</code></h3>
 <p><code>fingerprint()</code> (a SHA-256 hash of a raw public key, hex,
@@ -553,12 +554,12 @@ legitimate trustee quorum still can’t arm a <em>different</em> fielded
 instance, because that instance’s <code>mask</code> never travels with
 the ciphertext — it’s the algebraic property from §2.1, applied to a
 device rather than a person.</p>
-<h3 id="choosing-how-a-spac-trustees-own-share-is-protected">4.2
-Choosing how a SPAC trustee’s own share is protected</h3>
+<h3 id="choosing-how-a-spac-trustees-own-shard-is-protected">4.2
+Choosing how a SPAC trustee’s own shard is protected</h3>
 <p>This is the operation §4.7/§4.8 of the white paper are actually
 about, and the source of the original question this document grew out
 of. Nothing here is a new cryptographic primitive — it’s two
-<strong>independent</strong> choices, applied to a SPAC trustee’s share
+<strong>independent</strong> choices, applied to a SPAC trustee’s shard
 or mask, each drawing on a mechanism already described above:</p>
 <ul>
 <li><strong>Delivery axis (§4.7)</strong> — does the protection value
@@ -596,8 +597,9 @@ credential is itself a seizable artifact; a memorized value is not</td>
 </tr>
 <tr>
 <td>shardic-envelope (default)</td>
-<td>§3’s codeword-envelope delivery + shard-envelope reply, wrapping the
-trustee’s protection value to a keypair they already hold</td>
+<td>§3’s codeword-envelope delivery + unsealed-shard-envelope reply,
+wrapping the trustee’s protection value to a keypair they already
+hold</td>
 <td>Implemented (mechanism) / proposed as SPAC’s default (§4.7)</td>
 <td>Default for SPAC ceremonies</td>
 </tr>
@@ -639,13 +641,13 @@ trustee population, minimal setup friction</td>
 <td>DRBG-direct (SPAC default)</td>
 <td>A full 256-bit key drawn straight from the same CSPRNG class as the
 DEK/masks/nonces, used <strong>directly</strong> as the AES-256-GCM
-share-protection key — no <code>pick_words()</code>, no KDF stretching,
+shard-protection key — no <code>pick_words()</code>, no KDF stretching,
 because stretching only compensates for a human-chosen secret’s narrower
 guessing space</td>
 <td>Design proposal (§4.8) — no code path exists yet;
 <code>demo/combiner/app.py</code> does not currently generate or seal a
 value this way</td>
-<td>Standard SPAC default — gives share protection genuine bit-parity
+<td>Standard SPAC default — gives shard protection genuine bit-parity
 with the 256-bit DEK it protects</td>
 </tr>
 </tbody>
@@ -655,10 +657,10 @@ DRBG-direct path would replace the KDF step outright, not merely swap
 which KDF runs:</p>
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.4, today (codeword + KDF, baseline/opt-out):</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>share_key <span class="op">=</span> kdfmod.derive_key(kdf_method, kdf_params, codeword, salt)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>shard_key <span class="op">=</span> kdfmod.derive_key(kdf_method, kdf_params, codeword, salt)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># §4.8, proposed (DRBG-direct, SPAC default) -- not implemented:</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>share_key <span class="op">=</span> secrets.token_bytes(<span class="dv">32</span>)   <span class="co"># no codeword, no wordlist, no KDF</span></span></code></pre></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>shard_key <span class="op">=</span> secrets.token_bytes(<span class="dv">32</span>)   <span class="co"># no codeword, no wordlist, no KDF</span></span></code></pre></div>
 <p>A DRBG-direct key can’t be memorized, so it necessarily forces
 envelope (or shardware-token) delivery — but choosing envelope delivery
 does <em>not</em> require a DRBG-direct key; a normally generated
@@ -667,7 +669,7 @@ alone, exactly as the current implementation does. The two axes are
 independent but not symmetric.</p>
 <p>Every combination of the two axes still terminates in the exact same
 <code>reconstruct_secret[_with_prime]</code> call — the choice only
-changes how a share/mask is protected and delivered before it ever
+changes how a shard/mask is protected and delivered before it ever
 reaches that step, never what the reconstruction math does with it.</p>
 <h3 id="shardware-token-variants-design-proposals-no-new-field-math">4.3
 shardware-token variants (design proposals, no new field math)</h3>
@@ -675,12 +677,12 @@ shardware-token variants (design proposals, no new field math)</h3>
 new cryptographic construction:</p>
 <ul>
 <li><strong>Physical carriage</strong> — a token transports an already
-<code>shardic-envelope</code>-wrapped shard (§3.2’s shard envelope) in
-place of a network hop; nothing on the token is ever unencrypted, and
-<code>submit_shard_reply()</code>/<code>unwrap()</code> are reused
-unmodified.</li>
+<code>shardic-envelope</code>-wrapped unsealed shard (§3.2’s unsealed
+shard envelope) in place of a network hop; nothing on the token is ever
+unencrypted, and <code>submit_shard_reply()</code>/<code>unwrap()</code>
+are reused unmodified.</li>
 <li><strong>PUF-sealed embed/extract</strong> — a token generates its
-own X25519 keypair locally, seals a wrapped share behind
+own X25519 keypair locally, seals a wrapped shard behind
 PUF/secure-element storage, and releases it only against a vault-signed
 extraction grant. Still an X25519 keypair and the same
 <code>wrap()</code>/<code>unwrap()</code> primitive from §3.1 — the
@@ -731,11 +733,11 @@ value</td>
 <td>The fielded prime element, always</td>
 </tr>
 <tr>
-<td><strong>Per-share protection at rest</strong></td>
+<td><strong>Per-shard protection at rest</strong></td>
 <td>Codeword → KDF → AES-256-GCM</td>
 <td>Same, plus a type tag (prime/pool) inside the sealed payload</td>
-<td>Unchanged — envelope wraps the codeword/shard in transit, not the
-stored record</td>
+<td>Unchanged — envelope wraps the codeword/unsealed shard in transit,
+not the stored record</td>
 <td>Codeword → KDF (baseline/opt-out, implemented) <em>or</em>
 DRBG-direct key with no KDF (proposed default, §4.8); <code>mask</code>
 sourced from hardware, not memory, in the Fielded Prime Element
@@ -754,10 +756,10 @@ case</td>
 <td>Nothing — codewords are typed locally by whoever runs
 <code>vault_recover.py</code></td>
 <td>Same as base scheme</td>
-<td>A codeword envelope out, a shard envelope back — never a plaintext
-codeword</td>
-<td>Same envelope pattern, or a physically-carried wrapped shard
-(shardware-token)</td>
+<td>A codeword envelope out, an unsealed shard envelope back — never a
+plaintext codeword</td>
+<td>Same envelope pattern, or a physically-carried wrapped unsealed
+shard (shardware-token)</td>
 </tr>
 </tbody>
 </table>
@@ -776,30 +778,30 @@ matching the existing deck’s per-topic granularity (one concept per
 slide, not one section per slide):</p>
 <ul>
 <li><em>Slide A — “One Value, Two Ways to Protect It”</em>: §1.3/§1.4’s
-split diagram (DEK → SSS → shares → codeword-sealed) as the base
+split diagram (DEK → SSS → shards → codeword-sealed) as the base
 pattern, with §2’s one-time-pad-over-SSS shown as a light variant (a
 mask layered on top, prime trustee mandatory).</li>
 <li><em>Slide B — “Two Payloads, Two Directions”</em>: §3.2’s
-codeword-envelope vs. shard-envelope distinction as a two-card,
+codeword-envelope vs. unsealed-shard-envelope distinction as a two-card,
 opposite-arrow layout (combiner → trustee / trustee → combiner) — this
 is the piece most prone to being flattened into “envelope wraps the
 codeword” in informal summaries, so a slide that visually separates the
 two directions earns its keep.</li>
 <li><em>Slide C — “Two Independent Axes for a SPAC Trustee’s
-Share”</em>: §4.2.1/§4.2.2’s delivery axis (memorized vs. envelope)
+Shard”</em>: §4.2.1/§4.2.2’s delivery axis (memorized vs. envelope)
 crossed with the entropy-source axis (codeword+KDF vs. DRBG-direct) as a
 2×2 grid — the natural home for the asymmetry callout (DRBG forces
 envelope delivery; envelope doesn’t force DRBG) and for flagging
 DRBG-direct as still a design proposal, not shipped code.</li>
 </ul>
 <p><strong>Terminology.</strong> This document follows the project’s
-share-vs-shard distinction precisely (see
+shard-vs-unsealed-shard distinction precisely (see
 <code>.claude/skills/shardic-nomenclature/SKILL.md</code>):
-<em>share</em> is the at-rest, pre-match value inside a
-<code>.krypt</code> container; <em>shard</em> is the post-match,
-in-motion value that only exists in shardic-envelope’s recovery leg.
-Carry that distinction into any appendix or slide text built from this
-document — it’s easy to flatten by accident, and the project has already
-had that collision once.</p>
+<em>shard</em> is the at-rest, pre-match value inside a
+<code>.krypt</code> container; <em>unsealed shard</em> is the
+post-match, in-motion value that only exists in shardic-envelope’s
+recovery leg. Carry that distinction into any appendix or slide text
+built from this document — it’s easy to flatten by accident, and the
+project has already had that collision once.</p>
 </body>
 </html>

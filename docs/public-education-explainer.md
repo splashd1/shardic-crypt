@@ -7,7 +7,7 @@ code, no formulas beyond one you already know from school algebra.
 For the math in full, see `docs/sss_explained_for_shardic.md`; for the
 line-by-line implementation, see `docs/shardic-cryptographic-path.md`;
 for the complete treatment across all three levels of
-implementation, see `docs/shardic_white_paper.v4.0.md`. This document doesn't replace any
+implementation, see `docs/shardic_white_paper.v4.1.md`. This document doesn't replace any
 of those — it's the on-ramp to them.
 
 ---
@@ -134,6 +134,10 @@ custody as the only way encryption works.
   usage instructions for the CLI and GUI.
 - **Want the full case across all three levels of implementation,
   including the human-AI oversight design in detail?**
-  `docs/shardic_white_paper.v4.0.md`.
+  `docs/shardic_white_paper.v4.1.md`.
 - **Want the conference-length version of this pitch?**
   `docs/conference-talk-pitch.md`.
+- **Want it as slides?** `docs/shardic_deck_v4_1_foundations.pptx`
+  walks the same cryptographic foundation step by step, and
+  `docs/shardic_deck_v4_1_overview.pptx` is the short version with a
+  live demo.
