@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>shardic_white_paper.v4.1</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">shardic_white_paper.v4.1</h1>
+</header>
+<p><strong>SHARDIC</strong></p>
+<p>Sharded Encryption for Threshold-Recoverable Vaults,
+System-Integration Ceremonies, and Product-Embedded Protected
+Actions</p>
+<p><em>One Threshold-Recovery Primitive at Three Levels of
+Implementation: Personal Utility, System Security Integration, and
+Product Protection</em></p>
+<p><strong>White Paper — Version 4.1</strong></p>
+<p>September 2026</p>
+<hr />
+<h1 id="abstract">Abstract</h1>
+<p>Conventional file encryption is monolithic: whoever holds the key —
+or controls the system that holds it — controls the plaintext,
+permanently and alone. shardic takes that single point of control out of
+the cryptography itself instead of asking policy or process to make up
+for it. We encrypt a file or directory once under a random data
+encryption key (DEK), then split that DEK with Shamir’s Secret Sharing
+over GF(256) into T shards for T independent trustees, with a threshold
+D below T. Each trustee unlocks their shard with their own
+<strong>shardic encryption key</strong>, and it takes at least D of them
+to rebuild the DEK. Below that threshold, the shards carry zero
+information about the key. That’s not “expensive to break” — it holds no
+matter how much computing power an attacker brings.</p>
+<p>We apply that one primitive at three cumulative levels, each reusing
+the level beneath it unchanged.</p>
+<ul>
+<li><strong>Level 1 — personal and small-group utility.</strong> A
+family, individual, or small organization protects a file with T
+human-held codewords and a threshold D, using the CLI and GUI tools this
+project ships today. No server, no network.</li>
+<li><strong>Level 2 — shardic ceremony for system security
+integration.</strong> The same primitive, wrapped in public-key delivery
+and a repeatable, identity-backed process for registering, selecting,
+and provisioning trustees. It suits an organization’s standing trustee
+pool rather than a one-off personal setup. Like Level 1, it runs today
+as a demonstration combiner service.</li>
+<li><strong>Level 3 — SPAC for product protection.</strong> The
+protected value stops being “a file’s plaintext” and becomes any
+enabling code for a consequential action — arming a capability,
+releasing funds, clearing a safety interlock — bound to one fielded
+product through a hardware-bound Fielded Prime Element. Level 3 is a
+design proposal built entirely on the unmodified math of Levels 1 and 2.
+It’s also home to a timely extension: putting human and AI trustees
+under one explicit threshold rule, so neither an AI-initiated action nor
+a rogue or coerced human one can proceed without the other side’s
+independent agreement.</li>
+</ul>
+<p>Here’s the road ahead. We start by laying the three levels side by
+side so you can pick the depth that fits your interest. Then we walk
+Level 1’s operations and mechanics in full, follow with Level 2’s
+ceremony, and finish the build-up with Level 3’s SPAC ecosystem: the
+Fielded Prime Element, shardware-token hardware variants, and
+non-bypassable invocation. A security discussion spanning all three
+levels comes next, closing with NEAT, a design framework we name for
+critical SPAC deployments. Four scenarios then walk a full ceremony
+lifecycle — two product-protection cases, one network-path case, and one
+hybrid human-AI policy gate — before a closing summary of what the
+design offers and where it deliberately doesn’t fit. Two appendices
+round things out: a standalone primer on Shamir’s Secret Sharing, and
+the full story on codeword modes, tuning, and field deployment.</p>
+<hr />
+<h2 id="terminology-key">Terminology Key</h2>
+<p>T is the number of shards; D is the reconstruction threshold. A PT
+SPAC is the plaintext enabling value for a protected action; a CT SPAC
+is its protected ciphertext form. A Fielded Prime Element is a
+deployment-specific, hardware-bound contribution that ties release to
+one approved fielded system.</p>
+<h1 id="the-need-for-threshold-recoverable-protection">1. The Need for
+Threshold-Recoverable Protection</h1>
+<h2
+id="conventional-data-encryption-monolithic-single-point-control">1.1
+Conventional Data Encryption: Monolithic, Single-Point Control</h2>
+<p>Standard symmetric encryption is simple: generate a key, encrypt the
+data, and store or share the key so someone can decrypt later. That
+simplicity is also its structural weakness. Whoever holds the key — a
+person, a process, a single server — has complete, unilateral power over
+the data. Access is a binary, anonymous fact: you hold the key or you
+don’t. Nothing in the cryptography can require a joint decision, or
+prove afterward who authorized a recovery.</p>
+<p>Fancier key management doesn’t change that. Wrap the symmetric key
+under a public key, and the private key becomes the new monolithic
+secret — you’ve moved the single point of control, not removed it. Lock
+the key in an HSM, a safe, or a hardened server, and one compromised
+operator, one coerced admin, or one stolen credential still defeats it.
+The trust model keeps the same shape: one secret, one holder, one point
+of failure.</p>
+<p>For routine data, that’s a fine trade — simplicity and low friction
+usually win. It turns into a liability exactly where organizations care
+most: root credentials, master keys, and archives whose misuse by one
+rogue insider or compromised party would be catastrophic.</p>
+<h2 id="sharded-encryption-enforcing-multi-person-integrity">1.2 Sharded
+Encryption: Enforcing Multi-Person Integrity</h2>
+<p>shardic removes the single point of control from the cryptography
+itself. Instead of one key held by one party, we embed the DEK in a
+random polynomial built with Shamir’s Secret Sharing, so it takes D
+points to reconstruct. T points on that polynomial — the shards — each
+go to one of T independent trustees, and each trustee unlocks theirs
+only with their own shardic encryption key. No shard is a fragment of
+the DEK. Recovering the plaintext takes at least D trustees, each
+independently choosing to unlock and contribute their shard.</p>
+<p>This isn’t just operational enforcement, like requiring D signatures
+in an application layer. It’s information-theoretic: fewer than D shards
+leave the polynomial — and so the DEK — completely undetermined, equally
+consistent with every possible key, no matter how much computing power
+you throw at it.</p>
+<p>In practice:</p>
+<ul>
+<li>No single trustee — including whoever created the protected content
+(the “vault”) — can ever recover the data alone.</li>
+</ul>
+<p>Operational assumption: this holds only once the creator has securely
+deleted the plaintext, any retained shards, codeword copies, and other
+recovery material, and has verified trustee distribution. The
+cryptography can’t undo copies kept outside the scheme.</p>
+<ul>
+<li><p>A rogue insider, a coerced employee, or one compromised account
+can’t cause disclosure. It takes collusion among at least D independent
+parties.</p></li>
+<li><p>The trustee pool absorbs the loss or absence of up to T − D
+trustees without losing recoverability — unlike a strict N-of-N or
+two-person rule, which has no slack.</p></li>
+</ul>
+<p>A recovery can also yield an auditable record of authenticated
+contributors — if the deployment adds protected signing credentials,
+signed contributions, trustworthy timestamps, and retained verifiable
+logs. Threshold reconstruction alone doesn’t establish identity or legal
+non-repudiation.</p>
+<p>The net effect: data protection shifts from “who holds the key” — a
+fact about custody — to “who agreed to unlock it” — a fact about
+consent, spread across independent parties who can’t individually
+override the group.</p>
+<h2 id="representative-use-cases">1.3 Representative Use Cases</h2>
+<p>Threshold-recoverable encryption fits wherever policy, regulation, or
+risk tolerance already says no single party should be able to decrypt
+something alone, and where access is rare and high-stakes rather than
+continuous and routine. For example:</p>
+<h3 id="break-glass-access-to-critical-infrastructure">Break-glass
+access to critical infrastructure</h3>
+<p>Lock a root CA private key, a production database master key, or a
+SCADA override credential in a vault with T=7 trustees — senior
+engineers, security officers, an executive — and D=4. Day to day, nobody
+can reach the key. It comes back only in a genuine emergency, and only
+if four of the seven each agree to take part.</p>
+<h3 id="diceware-style-estate-and-succession-planning">Diceware-style
+estate and succession planning</h3>
+<p>A family or founder splits access to a password manager’s master
+vault, or other key-person credentials, among relatives, a lawyer, and a
+business partner (T=5, D=3), using whole-word codewords trustees can
+actually memorize instead of writing down.</p>
+<h3 id="government-and-public-sector-applications">Government and
+public-sector applications</h3>
+<ul>
+<li><p>Generalized two-person-rule systems (“any 3 of 7 officials”) that
+tolerate absence or incapacity without weakening the classic two-key
+model’s no-lone-actor requirement.</p></li>
+<li><p>Escrowed decryption keys for classified or lawful-intercept
+archives, split across officials from different branches or agencies so
+no single agency — or rogue insider within one — can decrypt
+alone.</p></li>
+<li><p>Continuity-of-government credentials that survive the loss of
+some custodians while still requiring majority agreement to
+invoke.</p></li>
+<li><p>Election tabulation keys split among representatives of multiple
+parties or observers.</p></li>
+</ul>
+<h3 id="business-and-regulated-industry-applications">Business and
+regulated-industry applications</h3>
+<ul>
+<li><p>M&amp;A escrow and dispute-resolution vaults — deal terms or
+sensitive documents released only by a quorum of board members, outside
+counsel, and an escrow agent.</p></li>
+<li><p>Cryptocurrency or treasury cold storage — root key material
+behind a multisig wallet, split among founders or board members so no
+single executive can move funds alone.</p></li>
+<li><p>Whistleblower or source-protection archives, releasable only when
+a threshold of editors or lawyers agree.</p></li>
+<li><p>Regulated data with separation-of-duties requirements (SOX, HIPAA
+“minimum necessary”) — technical enforcement of an existing compliance
+control, not just a policy statement.</p></li>
+</ul>
+<p>shardic fits best for rare, high-stakes, offline “break-glass” access
+with a small, fairly static trustee set, where you must be able to store
+and share the vault file without leaking who holds what. It fits poorly
+for frequent or live authorization, for revoking one trustee without a
+full re-split, or for online multi-party protocols — threshold-signature
+schemes (e.g. FROST) or HSM-backed multisig serve those better, with key
+rotation and live quorum.</p>
+<h2 id="how-threshold-secret-sharing-works-conceptually">1.4 How
+Threshold Secret Sharing Works, Conceptually</h2>
+<p>We’ll get to the byte-by-byte construction later. First, let’s build
+intuition for why a threshold scheme works at all — because “splitting a
+key into pieces” isn’t what shardic does, and wouldn’t give you
+shardic’s guarantees.</p>
+<p>Say you cut the 32-byte DEK into four 8-byte chunks and hand one to
+each of four trustees. Or you do the cleverer XOR split: every shard is
+random except the last, chosen so they all XOR back to the key. Both
+give you multi-party protection, and both can be
+information-theoretically sound in the narrow sense that holding fewer
+than all pieces reveals nothing. But both are all-or-nothing.
+Reconstruction needs every piece; you can’t ask for “any D of T.” Lose
+one trustee for good, and the key is gone forever — exactly the
+fragility threshold recovery exists to avoid.</p>
+<p>The real idea: hide the secret as a point that only enough hints can
+locate. Picture the DEK not as bytes but as the spot where a straight
+line crosses the vertical axis. Draw that line so it also passes through
+T other points, one per trustee. A single trustee’s point tells them
+nothing: infinitely many lines pass through it, each crossing the axis
+somewhere different, so every secret stays equally possible. Put any two
+trustees’ points together, though, and exactly one line passes through
+both — so there’s exactly one crossing. Two points fix a line; that’s
+what makes D = 2 work.</p>
+<p><img src="./media/sss-geometric-intuition.png"
+style="width:5.2in;height:2.33in" /></p>
+<p>Raise the threshold to three and the trick generalizes: swap the line
+for a curve with one more bend (a parabola), which takes three points to
+pin down. One or two points still leave every secret equally plausible.
+In general, a threshold of D is a curve that needs exactly D points to
+fix, with T points handed out, one per trustee, all on the same curve.
+Because any D of the T points will do — not a specific D, and not all T
+— the scheme absorbs the loss of up to T − D trustees, just as promised
+earlier.</p>
+<p>There’s no partial progress, either. A combination lock rewards
+partial knowledge — get two of three digits and you’re close. A
+threshold scheme doesn’t. One trustee’s point, or even D − 1 of them,
+doesn’t narrow the secret to a short list; every value stays exactly as
+plausible as before. No partial credit, no “getting warmer,” no ruling
+out candidates one collusion at a time. Until the Dth point arrives, the
+answer doesn’t exist.</p>
+<p>In the actual implementation, “a line” or “a curve” becomes a
+polynomial of degree D − 1 over a finite field, applied independently to
+each byte of the DEK — the same idea, made precise and computable. The
+technical mechanics later on dig into it.</p>
+<h1 id="three-levels-of-implementation">2. Three Levels of
+Implementation</h1>
+<p>The rest of the paper covers shardic’s mechanics in full. Here we
+preview how they stack into three cumulative levels, so you can find the
+depth that matches your interest before diving in. Each level reuses
+Level 1’s D-of-T guarantee unchanged: Level 2 changes how a trustee’s
+key reaches them and how the trustee pool is organized; Level 3 changes
+what the protected value actually gates. You can stop at any level and
+still have a complete, sound system — each stands on its own, not as a
+staging ground for the next.</p>
+<p><img src="./media/capability-stack.png"
+style="width:5.2in;height:5.16in" /></p>
+<h2 id="level-1-personal-and-small-group-utility-implemented">2.1 Level
+1 — Personal and Small-Group Utility (implemented)</h2>
+<p>The foundation, and all you need for the personal, estate, and
+small-business cases above: split a secret so that nothing short of D of
+T independently held codewords can reconstruct it, with zero information
+leaking below that threshold regardless of computing power. It’s a
+complete, standalone tool today. The project’s CLI and GUI implement
+exactly this, with no server, no network dependency, and no
+infrastructure beyond the <code>.krypt</code> file and whatever
+out-of-band channel you use to hand codewords to trustees. Coming up
+next, we walk through creating and recovering a vault at this level,
+then dig into the mechanics underneath.</p>
+<h2
+id="level-2-shardic-ceremony-for-system-security-integration-implemented">2.2
+Level 2 — Shardic Ceremony for System Security Integration
+(implemented)</h2>
+<p>Level 1’s manual, one-off codeword handoff suits a family or small
+team, but it doesn’t scale to an organization that needs a standing,
+auditable, repeatable process — say, a security team managing many
+vaults against a rotating on-call trustee pool. Level 2 is that more
+robust ceremony. shardic-envelope removes the memorability ceiling by
+delivering each trustee’s key wrapped under their public key instead of
+memorized. Ceremony formation turns trustee registration and selection
+into a tracked process backed by an identity provider: candidate
+registration, per-vault quorum selection with an ordered backup list,
+automatic backfill on decline or timeout, and single-read, addressed
+delivery of each wrapped key. It’s implemented and demonstrated
+end-to-end today (<code>shardic_envelope_crypto.py</code>,
+<code>demo/combiner/app.py</code>), not just proposed. Adopting it is
+optional — if Level 1 covers your needs, you lose nothing by skipping
+it.</p>
+<h2 id="level-3-spac-for-product-protection-design-proposal">2.3 Level 3
+— SPAC for Product Protection (design proposal)</h2>
+<p>Level 3 generalizes the protected value from “a file’s plaintext” to
+any enabling code for a protected action — a shardic protected action
+code, or SPAC. It also turns the ceremony from one fixed shape into
+something you tailor per deployment — which trustees, which local-unlock
+factors, which recovery-time objective — to fit a product’s or fielded
+system’s CONOPS and embedment environment. Binding a SPAC to one
+specific piece of hardware (the Fielded Prime Element, introduced later)
+is what turns an abstract capability-gating framework into something a
+product team can actually embed: a treasury platform’s
+disbursement-signing credential, a safety interlock’s release-enable
+value, or any consequential action a product should never authorize on
+the word of one compromised or coerced party.</p>
+<p>This level also holds the pattern we consider most consequential:
+composing human and AI trustee classes under one explicit threshold
+rule, so neither an AI-initiated action nor a rogue human one can
+proceed without the other class agreeing independently. Everything here
+is a design proposal, built entirely on the already-implemented,
+unmodified math of Levels 1 and 2.</p>
+<h1 id="level-1-concept-of-operations">3. Level 1: Concept of
+Operations</h1>
+<h2 id="scope-mechanical-foundation-not-end-solution">3.0 Scope:
+Mechanical Foundation, Not End Solution</h2>
+<p>This part describes shardic’s mechanical foundation from the
+operator’s seat — how you create, distribute, and reconstruct a
+protected value — independent of any specific tool. It’s an essential
+piece of a protection system, not the whole thing. Before using a
+protected value or SPAC operationally, a deployment still has to
+establish its authorization policy, trusted operating environment,
+identity and credential assurance, custody procedures, audit retention,
+incident response, and system-specific safety controls.</p>
+<h2 id="creating-a-vault">3.1 Creating a Vault</h2>
+<p>You start with two numbers: how many trustees (T) will each hold a
+shardic encryption key, and how many (D) must agree to recover. From
+there, vault creation is a fixed sequence. We archive the input into one
+blob and encrypt it once under a random 256-bit DEK. We split the DEK
+into T Shamir shards at threshold D, protect each shard under its own
+shardic encryption key (SEK), and write everything out as one
+self-contained <code>.krypt</code> file — plus one credential per
+trustee, in whatever form the chosen key source produces.</p>
+<p>You can adapt the SEK mechanism to the end solution. The prototype
+utility generates codewords and runs them through a key derivation
+function. Environments with established identity and access management
+can use PKI-protected, DRBG-generated keys instead. In short, shardic
+plugs in regardless of how you generate and protect keys.</p>
+<p>What’s left for you is procedural, not cryptographic: hand each
+trustee their credential out of band, over a channel the system or
+trustee controls, then delete any local copies. Who gets which
+credential, and how, is a trust decision that belongs to you, not the
+software — the tooling deliberately doesn’t automate distribution.</p>
+<h2 id="recovering-a-vault">3.2 Recovering a Vault</h2>
+<p>At recovery, any D of the T trustees supply their shardic encryption
+keys — you don’t need to know or say which D. Recovery never asks “which
+trustee are you?” It tries each supplied key against every unmatched
+shard until one authenticates. Keys can arrive in any order. If fewer
+than D match, or any are wrong, recovery reports how many it accepted
+and stops — it never produces partial or best-guess output.</p>
+<h2 id="shardic-prime-a-mandatory-trustee-variant">3.3 shardic-prime: A
+Mandatory-Trustee Variant</h2>
+<p>The base scheme treats every trustee the same: any D of T keys
+recover the vault, full stop. shardic-prime adds one essential trustee
+on top. The prime trustee’s key must always be among those supplied, no
+matter how many others you gather; the rest form an ordinary,
+interchangeable pool. This fits cases where one specific role — an
+estate’s executor, an organization’s security lead — must always sign
+off, while their backups can be any qualifying subset. With T=4 and D=3,
+that’s one prime trustee plus three pool trustees, and recovery needs
+the prime’s key plus any two of the three pool keys.</p>
+<p>All three pool keys without the prime’s recover nothing — and the
+construction itself guarantees that, not just the tooling. As in the
+base scheme, you don’t have to say in advance which key belongs to the
+prime trustee; recovery identifies it once decryption succeeds. Later
+on, the prime trustee’s role comes back in a new form: it generalizes to
+a hardware-embodied instance without any new math.</p>
+<h1 id="level-1-technical-mechanics">4. Level 1: Technical
+Mechanics</h1>
+<p>Now for how the <code>.krypt</code> container actually protects data:
+how we generate the DEK, how Shamir’s Secret Sharing protects its
+recovery, and how a shardic encryption key in turn protects each
+shard.</p>
+<h2 id="archive-and-data-encryption-key">4.1 Archive and Data Encryption
+Key</h2>
+<p>Vault creation runs in a fixed sequence:</p>
+<ul>
+<li><p>We bundle the input file or directory with tar into one blob, so
+one file and an entire directory tree look the same. We deliberately
+leave the archive uncompressed (mode “w”, not “w:gz”), so ciphertext
+size doesn’t track plaintext compressibility — compression can leak
+content through size alone.</p></li>
+<li><p>We generate a random 256-bit DEK from a cryptographically secure
+source (<code>secrets.token_bytes</code>).</p></li>
+<li><p>We encrypt the archive exactly once under that DEK with
+AES-256-GCM and a random 96-bit nonce. GCM gives both confidentiality
+and built-in tamper detection: modify the ciphertext and authentication
+fails, instead of silently decrypting to garbage.</p></li>
+</ul>
+<p>At this point, the DEK is the one secret standing between ciphertext
+and plaintext — just as in conventional encryption. The difference is
+what we do with it next.</p>
+<p><img src="./media/image1.png"
+style="width:5.2in;height:3.29in" /></p>
+<h2 id="shamirs-secret-sharing-over-gf256">4.2 Shamir’s Secret Sharing
+over GF(256)</h2>
+<p>Rather than storing the DEK or handing it to one custodian, we split
+it with a byte-wise Shamir’s Secret Sharing (SSS) over GF(2⁸) — the
+construction classic tools like ssss use, and the same field arithmetic
+AES itself uses (generator 3, reduction polynomial 0x11B).</p>
+<p>For each of the DEK’s 32 bytes, independently:</p>
+<ul>
+<li><p>The byte becomes the constant term of a random polynomial of
+degree D − 1, with the other coefficients drawn uniformly at
+random.</p></li>
+<li><p>Each of the T shards is that polynomial evaluated at a distinct
+x-coordinate (1 through T), across all 32 byte positions at
+once.</p></li>
+<li><p>Reconstruction takes any D shards and runs Lagrange interpolation
+at x = 0, per byte position, to recover the original byte.</p></li>
+</ul>
+<p>This security is information-theoretic, not merely computational. Any
+D points uniquely determine a degree D − 1 polynomial, but with only D −
+1 points, every value of the constant term — the secret byte — stays
+equally consistent. An attacker holding D − 1 shards learns exactly zero
+bits about the DEK, regardless of computing power, time, or future
+cryptanalysis against AES. That matters more and more as
+<em>cryptographically relevant quantum computers</em> approach: the
+guarantee holds not because breaking it is hard, but because the
+information needed to break it isn’t there.</p>
+<p><img src="./media/image2.png"
+style="width:5.2in;height:2.42in" /></p>
+<h2 id="shardic-encryption-key-protection-of-shards">4.3 Shardic
+Encryption Key Protection of Shards</h2>
+<p>A raw Shamir shard is still just data. Write D of them to disk
+unprotected, and anyone holding them can rebuild the DEK without any
+trustee’s cooperation. So we encrypt each shard individually before it
+goes into the vault, under a 256-bit AES-256-GCM key its trustee holds:
+the <strong>shardic encryption key</strong>. The guarantee only needs
+each trustee to hold one independently — not any particular way of
+producing it. We name four sources, so no single implementation choice
+can go stale on you. Pick whichever fits your trustee population and
+CONOPS, and mix sources across trustees in the same vault if you
+like:</p>
+<ul>
+<li><p><strong>KDF from a memorized or transcribed secret</strong> —
+what we implement and demonstrate today. We generate a random, typeable
+secret (a <strong>codeword</strong>, in this project’s terms; the
+codeword appendix covers its three generation modes) plus a random salt,
+and derive a 256-bit key with PBKDF2-HMAC-SHA256 (400,000 iterations by
+default) or Argon2id (time_cost=4, memory_cost=256 MiB, parallelism=4 —
+memory-hard, and preferred when the optional argon2-cffi package is
+installed). It’s the only source that asks a trustee to remember or
+transcribe anything, and as the security discussion explains, its
+strength — not the Shamir/AES layer — is the design’s real computational
+bottleneck.</p></li>
+<li><p><strong>shardic envelope</strong> — a full-strength key from a
+CSPRNG, with no wordlist and no KDF stretching, delivered wrapped under
+the trustee’s public key instead of memorized. The Level 2 ceremony
+covers delivery, and the SPAC design later states when this becomes the
+default and why.</p></li>
+<li><p><strong>External token</strong> — a hardware credential the
+trustee already holds (a PIV/FIDO2 device, an HSM, a shardware-token)
+supplies or releases the key, so this project’s code never generates it
+at all. This fits trustee populations that already operate as
+cryptographic identities and would rather reuse that infrastructure than
+stand up a parallel one.</p></li>
+<li><p><strong>Other mainstream key-generation or derivation
+mechanisms</strong> — an explicit extension point, not a closed list.
+Shard protection only needs a 256-bit AES-GCM key from somewhere. An
+enterprise KMS key, a PKI-issued credential, or any other
+standards-based mechanism you already trust works as well as the three
+above, as long as you generate and hold the key with comparable
+rigor.</p></li>
+</ul>
+<p>We encrypt the shard (its x-coordinate plus 32 y-bytes) with
+AES-256-GCM under the resulting key and its own random nonce. For each
+shard, the vault records only an opaque triple — {salt, nonce,
+ciphertext} for a KDF-derived key, or {nonce, ciphertext} for a key that
+skips the KDF. The container’s metadata records the key source, KDF
+method, and parameters once, so the vault describes itself and recovery
+never needs out-of-band settings.</p>
+<p><img src="./media/image3.png"
+style="width:5.2in;height:4.11in" /></p>
+<h2 id="the-.krypt-container-and-zero-leakage-indexing">4.4 The .krypt
+Container and Zero-Leakage Indexing</h2>
+<p>Everything above — metadata and ciphertext — goes into a single
+<code>.krypt</code> file: an 8-byte magic header, a length-prefixed JSON
+metadata block, and the raw AES-GCM ciphertext of the archive (raw
+bytes, not base64, which avoids a ~33% size penalty). That’s deliberate:
+one file to copy, email, or upload, with no companion metadata file to
+lose.</p>
+<p>The shard list maps nothing to trustees or to shardic encryption
+keys. Each entry is just an opaque {salt, nonce, ciphertext} triple, and
+we shuffle their order at creation. Recovery works by trial: it tries
+each supplied key, via AES-GCM, against every unmatched shard record.
+GCM’s authentication tag makes this a reliable oracle — the right
+pairing decrypts, and every wrong one fails fast with an authentication
+error instead of plausible-looking garbage.</p>
+<p>Realistic shardic deployments top out at double-digit trustee counts.
+With T in the tens, exhaustive trial is effectively instant, and it buys
+a real security property: on its own, the <code>.krypt</code> file
+reveals nothing about which shard belongs to which trustee, or which
+keys an attacker would need to compromise together. (The construction
+also generalizes to a larger field without new cryptographic risk,
+though that isn’t a drop-in change.)</p>
+<p><img src="./media/image4.png" style="width:5.2in;height:4in" /></p>
+<h2 id="how-shardic-prime-varies">4.5 How shardic-prime Varies</h2>
+<p>shardic-prime layers a one-time-pad mask over the ordinary Shamir
+construction rather than adding new field arithmetic. With the DEK as
+the secret:</p>
+<pre><code>mask          = random bytes, same length as the DEK
+masked_secret = DEK XOR mask
+pool_shards   = split_secret(masked_secret, pool_threshold, pool_size)</code></pre>
+<p>The prime trustee’s shardic encryption key protects mask directly —
+an all-or-nothing pad, not a point on a Shamir polynomial. Recovery
+needs both mask and at least pool_threshold pool shards:</p>
+<pre><code>masked_secret = reconstruct_secret(pool_shards)
+DEK           = masked_secret XOR mask</code></pre>
+<p>Without the mask, the pool shards — even all of them — only rebuild
+masked_secret, which looks like uniform random noise. Without
+pool_threshold pool shards, the mask alone reveals nothing either. Each
+half keeps the base scheme’s information-theoretic guarantee, and
+layering them makes the prime trustee mathematically essential, not just
+conventionally required.</p>
+<p><img src="./media/image5.png"
+style="width:5.2in;height:3.33in" /></p>
+<p>This one-time-pad construction turns out to be the linchpin of
+everything at Level 3. Because mask is just a value, nothing in
+reconstruct_secret_with_prime() requires a human to hold it. When we get
+to product protection, we reuse this exact code, unmodified, to bind the
+same math to a piece of hardware instead.</p>
+<h1 id="level-2-shardic-ceremony-for-system-security-integration">5.
+Level 2: Shardic Ceremony for System Security Integration</h1>
+<p>As previewed earlier, Level 2 takes the same primitive and wraps it
+in public-key delivery plus a repeatable, identity-backed process for
+registering and selecting trustees — for organizations whose trustee
+pool is a standing asset, not a one-off personal arrangement.</p>
+<h2 id="shardic-envelope-public-key-wrapped-delivery-implemented">5.1
+shardic-envelope: Public-Key-Wrapped Delivery (Implemented)</h2>
+<p>A memorized secret run through a KDF gives you quick, low-friction
+key distribution, but it makes that key’s strength — not the Shamir/AES
+layer — the design’s real computational floor. shardic-envelope removes
+that ceiling for systems and trustees willing to hold a keypair: it
+wraps each trustee’s shardic encryption key under a public key the
+trustee already controls, instead of under the limits of human memory.
+It’s implemented and demonstrated end-to-end today
+(<code>shardic_envelope_crypto.py</code>,
+<code>demo/combiner/app.py</code>).</p>
+<ul>
+<li><p>It works strictly on vault creation’s output — the plaintext
+credential a trustee would otherwise receive — and never touches
+<code>vault_core.py</code>. The encrypt/split/KDF path stays untouched,
+and the base scheme’s guarantees stay intact.</p></li>
+<li><p>It wraps each trustee’s key in a hybrid, ECIES-style envelope
+(X25519 ECDH + HKDF-SHA256 + AES-256-GCM), shaped to mirror the vault’s
+existing {salt, nonce, ciphertext} shard-record convention instead of
+inventing a new format.</p></li>
+<li><p>The combiner — the service that holds the <code>.krypt</code>
+ciphertext and every wrapped envelope, and orchestrates registration and
+recovery — never receives a plaintext shardic encryption key. It only
+ever sees unsealed shards, derived locally by each trustee and
+re-wrapped under the combiner’s own public key on the way back.</p></li>
+</ul>
+<p>From the trustee’s side, recovery looks the same as in the base
+scheme. What changes is provisioning: the trustee’s own device decrypts
+an envelope locally, once, to get the value they’d otherwise have to
+memorize or transcribe.</p>
+<h2 id="ceremony-formation-credentials-and-delivery-implemented">5.2
+Ceremony Formation, Credentials, and Delivery (Implemented)</h2>
+<p>Public-key delivery raises two practical questions, which a follow-on
+prototype of the shardic “ceremony” — essentially a lifecycle process —
+answers:</p>
+<ol type="1">
+<li>How does a trustee’s public key get established and trusted in the
+first place?</li>
+<li>How does an operator convene a specific quorum for a given vault
+instead of improvising trust decisions every time?</li>
+</ol>
+<ul>
+<li><p><strong>Registration.</strong> We draw candidate trustees from a
+dedicated Keycloak group, queried by a read-only service account scoped
+to that group. Each trustee generates their keypair client-side; the
+private key never transits — or even briefly sits on — any server
+shardic controls. This keeps identity and selection (Keycloak’s job)
+cleanly apart from key custody (never Keycloak’s job).</p></li>
+<li><p><strong>Ceremony formation.</strong> An operator, authenticated
+through a dedicated shardic-operator realm role, picks T primary
+trustees plus an ordered backup list from the candidate directory and
+sends invitations. Declined or timed-out invitations backfill
+automatically from the backup list — race-safe, so a late acceptance
+from an already-backfilled slot gets rejected instead of double-filling
+it. A separation-of-duties check stops the operator who forms a ceremony
+from picking themselves as one of its trustees.</p></li>
+<li><p><strong>Delivery.</strong> We deposit wrapped envelopes at an
+authenticated, single-read drop point, addressed by trustee identity
+rather than a contact channel. Each trustee fetches their own envelope,
+once. “Exactly once” doubles as detection: a second read on an
+already-claimed envelope signals something’s wrong.</p></li>
+<li><p><strong>Recovery.</strong> Unchanged — it’s the same act
+described back in Level 1’s walkthrough.</p></li>
+</ul>
+<p><img src="./media/ceremony-envelope-flow.png"
+style="width:5.2in;height:4.52in" /></p>
+<p>The organizing principle throughout: identity and selection stay
+separate from key custody, and both stay separate from the offline,
+fail-closed recovery math underneath. A compromised identity provider or
+a stalled ceremony can block provisioning, but neither can weaken the
+D-of-T guarantee on its own. Level 3 builds directly on this machinery,
+reusing it unmodified for the pool-trustee side of a SPAC ceremony.</p>
+<h1 id="level-3-spac-for-product-protection">6. Level 3: SPAC for
+Product Protection</h1>
+<p>Status: design proposal.</p>
+<p>So far we’ve built a working baseline for multi-party-enforced
+access. Next, we show how that capability becomes a practical,
+deployable system. It isn’t fielded yet, but nothing in the cryptography
+stands in the way.</p>
+<p>The generalized approach matters most where stakes are getting harder
+to keep under genuine human control: high-value operations that AI
+systems increasingly initiate, analyze, or partly execute, under time
+pressure that wears down purely procedural safeguards. Human-in-the-loop
+AI protection takes much more than clever math — the security discussion
+and the human-AI oversight case later on take that up directly. First,
+some background on SPAC.</p>
+<h2 id="from-data-to-capability-pt-spac-and-ct-spac">6.1 From Data to
+Capability: PT SPAC and CT SPAC</h2>
+<p>The plaintext shardic protects never had to be a file. More
+generally, it’s the enabling value for some protected action — gaining
+financial access, arming a safety-critical system, unlocking a sensitive
+document, granting account access — anywhere “the right D-of-T parties
+agreed” should be the actual gate on the action, not a procedural
+approval bolted on top. A shardic protected action code (SPAC) is that
+enabling value. PT SPAC and CT SPAC are its plaintext and ciphertext
+forms, in the same relationship as any other plaintext/ciphertext pair
+here. In this setting, the recovery step of the ceremony releases the
+protected action’s data or logic into the operational runtime — whether
+code or programmable logic.</p>
+<p>This reframe has precedent outside cryptography. Permissive Action
+Links (PAL) — codes required to authorize a safety-critical action,
+withheld until an authorized multi-party release procedure completes —
+are the closest existing analog for gating a capability rather than
+data. Two-Person Integrity (the Two-Man Rule) names what the trustee
+threshold, plus the ceremony’s separation-of-duties check, already
+implement.</p>
+<h2 id="the-shardic-client-module-and-the-fielded-prime-element">6.2 The
+Shardic Client Module and the Fielded Prime Element</h2>
+<p>The consuming system — whatever actually executes the protected
+action — gets a “plugin” at the critical-path point where it needs the
+PT SPAC. During development and test, the real PT SPAC sits right in
+that pipeline, so you can validate the system end-to-end. Before
+fielding, you swap the PT SPAC for a CT SPAC embedded in a shardic
+client module at the same plugin point.</p>
+<p>Fielded-system binding is what makes this safe to field at all: a
+copied CT SPAC plus a fully legitimate D-of-T quorum must still fail to
+arm the action on any client module other than the one it was emplaced
+in. That takes no new cryptography. We reuse shardic-prime’s mask/pool
+construction unmodified, with one substitution: the fielded system’s own
+hardware-sealed secret stands in for mask.</p>
+<pre><code>mask        = the fielded system&#39;s own hardware-sealed secret
+              (PUF/secure-element, non-extractable, generated once at
+              emplacement, never leaves this hardware, never typed by
+              a human, never a codeword)
+pool_shards = ordinary trustee shards, delivered by shardware-token or
+              network exactly as in the Level 2 ceremony
+DEK         = reconstruct_secret_with_prime(mask, pool_shards)  -- unmodified
+CT_SPAC     = AES-256-GCM(PT_SPAC, DEK)                         -- unmodified</code></pre>
+<p>Copy CT_SPAC to different hardware and bring a full legitimate quorum
+along — reconstruction still fails, because mask lives in one specific
+piece of silicon and can’t be extracted. We deliberately scope this to
+one piece of hardware, full stop: no multi-unit redundancy. Replace the
+hardware, and mask goes with it; there’s no export path. Beyond the
+natural IP-protection benefit, this blocks out-of-band attacks and
+shrinks the attack surface if a shard is ever compromised.</p>
+<h2 id="shardware-token-hardware-based-ceremony-variants">6.3
+shardware-token: Hardware-Based Ceremony Variants</h2>
+<p>We sketch two variants for how a physical token takes part in a
+ceremony, differing in how much trust the token itself carries:</p>
+<h3 id="physical-carriage">Physical carriage</h3>
+<p>The token simply transports an already-wrapped shard, replacing a
+network hop with a courier, hand-off, or safe-deposit retrieval
+(“sneaker-net”). That suits a ceremony that wants to run fully
+air-gapped after registration. The token can be plain dumb storage: the
+shard is already wrapped under a public key before it lands there, so
+nothing on it is exposed.</p>
+<h3 id="puf-sealed-embedextract">PUF-sealed embed/extract</h3>
+<p>A hardened variant answers the identity question cryptographically.
+At “embed” time (vault creation), the token generates its own keypair
+locally, receives a shard wrapped to that keypair, and seals it into
+PUF/secure-element storage that only a matching physical measurement of
+the chip can unlock. At “extract” time (recovery), the token releases
+its shard only against a vault-signed extraction grant: short-lived,
+token-bound, nonce-fresh, and chained to a rarely touched root signing
+key through an intermediate that rotates on a policy schedule rather
+than per ceremony.</p>
+<h2 id="roles-and-governance">6.4 Roles and Governance</h2>
+<p>A SPAC ceremony adds roles beyond the trustee/operator pair from the
+Level 2 ceremony. Each answers a distinct question, and we keep them
+separate so no single compromised role can undermine the ceremony:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>Answers</th>
+<th>Held by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trustee (pool)</td>
+<td>Who must jointly agree to recover?</td>
+<td>Ordinary shardic-envelope trustees, unchanged from Level 2</td>
+</tr>
+<tr>
+<td>Fielded Prime Element</td>
+<td>What binds recovery to one specific piece of fielded hardware?</td>
+<td>The fielded system’s own sealed secret — never a party at all</td>
+</tr>
+<tr>
+<td>Local custodian</td>
+<td>Who is physically present to authorize the fielded hardware’s own
+local unseal?</td>
+<td>Whoever holds the deployment’s chosen possessed (key/token) or known
+(PIN/passphrase) factor — a role, not an identity</td>
+</tr>
+<tr>
+<td>Operator</td>
+<td>Who authorizes a given extraction request?</td>
+<td>A single, on-call shardic-operator-equivalent role, barred from
+authorizing a grant naming their own token</td>
+</tr>
+<tr>
+<td>Approver</td>
+<td>Who attests that the value being protected is the correct, tested
+one?</td>
+<td>An authority independent of whoever performs the wrap/emplacement
+step, holding a distinct signing key from the extraction-grant
+chain</td>
+</tr>
+</tbody>
+</table>
+<p>The Approver deserves emphasis because it closes an easy-to-miss gap.
+AES-256-GCM guarantees a CT SPAC decrypts to exactly what went in, or
+fails loudly — but it says nothing about whether what went in was right.
+A stale value, or a malicious substitution at wrap time, would sail
+straight through. So the Approver — effectively an auditor, independent
+of the wrap operator — signs a commitment to the validated PT SPAC at
+approval time. We check that commitment once, slowly and thoroughly, at
+emplacement, and again, quickly, at every arming event via a fast
+wrapped-MAC derived from the same approval.</p>
+<h2 id="availability-latency-and-conops-trade-offs">6.5 Availability,
+Latency, and CONOPS Trade-offs</h2>
+<p>Not every SPAC deployment tolerates the same ceremony duration.
+Rather than impose one answer, we treat the target RTO (recovery time
+objective) as a per-deployment parameter, driven by the actual CONOPS:
+who the trustees, operator, and custodians really are, how they’re
+staffed, and what infrastructure already reaches them.</p>
+<p>Three points drive nearly all the achievable latency:</p>
+<ul>
+<li><p><strong>Convening the quorum.</strong> Pre-forming a ceremony
+ahead of need turns “select, invite, wait for acceptance” into a
+one-time setup cost paid before the RTO clock starts — the biggest lever
+you have. A cold-start convening can take hours; a pre-formed, on-call
+quorum can respond in seconds to minutes.</p></li>
+<li><p><strong>Shard delivery.</strong> A network path is near-instant;
+physical carriage takes minutes to days, depending on distance and
+custody logistics. Air-gap independence and a tight RTO are largely
+mutually exclusive — pick the one you actually need.</p></li>
+<li><p><strong>Endgame unlock.</strong> A single operator and a single
+local custodian each make a fast, cryptographically sufficient decision.
+But one authorized person you can’t reach is a single point of
+<em>availability</em> failure — distinct from a single point of
+<em>authorization</em>. An on-call backup roster for both roles protects
+availability without weakening the one-authorizer, one-custodian
+property.</p></li>
+</ul>
+<p>None of this changes how many parties the cryptography requires.
+Latency gains come from pre-positioning and parallelizing inputs you
+already need, not from needing fewer. Picking a target RTO really means
+picking how much friction a mission will trade away — a call the CONOPS
+makes, not this design.</p>
+<h2
+id="non-bypassable-invocation-ensuring-the-ceremony-cannot-be-skipped">6.6
+Non-Bypassable Invocation: Ensuring the Ceremony Cannot Be Skipped</h2>
+<p>Status: design proposal.</p>
+<p>Mathematics, not administrator trust, enforces the below-threshold
+guarantee. But that guarantee only protects you if the system can’t
+route around the ceremony. The bypass surface appears wherever a SPAC
+ceremony gates one step in a larger sequence: a system moving from an
+initial state, through intermediate states, to an end state gets a
+cryptographic guarantee only if it actually invokes the ceremony on the
+way. Nothing in shardic — however unbreakable below threshold — stops a
+design flaw where another code path, a config flag, or a maintenance
+procedure reaches the end state without ever calling the ceremony.
+That’s a topological property of the surrounding system, not a
+cryptographic one, and it needs its own design treatment rather than
+being assumed.</p>
+<p>Four patterns bind the ceremony into the execution path, with
+progressively stronger guarantees. They aren’t mutually exclusive —
+fielded deployments typically layer several — and the composite is only
+as strong as its weakest layer.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Mechanism</th>
+<th>Bypass Resistance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Capability binding</td>
+<td>The ceremony’s protected value is (or unlocks) a value the end state
+structurally requires as an input — a signing key, a decryption key for
+the end state’s own payload — rather than a boolean checked before
+proceeding</td>
+<td>Medium: no path to the end state without the value itself, but only
+as strong as where that value is generated and held</td>
+</tr>
+<tr>
+<td>Constrained state machine</td>
+<td>The full operating sequence is modeled as an explicit graph with no
+edge that reaches the end state without passing through the ceremony,
+enforced by the same trust boundary that holds the ceremony’s
+ciphertext</td>
+<td>Medium: still an enforced check; tampering with the graph means
+tampering with the boundary that also protects the cryptographic
+material</td>
+</tr>
+<tr>
+<td>Secure-element-internal sequencing</td>
+<td>The Fielded Prime Element performs the end-state operation
+internally as a side effect of completing the ceremony; the outer system
+receives only the completed result, never the protected value or a
+pass/fail decision to act on</td>
+<td>High: collapses the topological and cryptographic bypass surfaces
+into the same tamper-resistant boundary</td>
+</tr>
+<tr>
+<td>Physical interlock</td>
+<td>The end state’s actuation circuit is physically incomplete until the
+ceremony asserts an unlock signal — a relay, key-switch, or discrete
+circuit closure</td>
+<td>Highest: bypass requires physical intervention on the interlock
+itself, not software compromise</td>
+</tr>
+</tbody>
+</table>
+<p>The two hardware-anchored patterns extend designs you’ll see shortly
+more than they might appear to. The treasury vignette’s HSM-backed
+appliance and the safety-interlock vignette’s dual-key-switch secure
+element are already Fielded Prime Elements. Secure-element-internal
+sequencing just asks that hardware to perform the disbursement signature
+or interlock transition itself, instead of releasing a key to software
+trusted to act on it correctly. The physical interlock descends directly
+from the Permissive Action Link precedent — PAL systems have used
+physical arming-circuit interlocks for exactly this reason since long
+before threshold cryptography existed to protect the unlock code.</p>
+<p>Which pattern or combination fits is a CONOPS decision, just like
+RTO. Capability binding alone may suffice where the consuming system’s
+code is already tightly controlled and audited; a safety-critical
+interlock plausibly warrants the strongest tier regardless of cost. The
+security discussion pins down exactly which guarantee each tier
+delivers.</p>
+<p>The upshot: integrate SPAC into secure design practice so the
+ceremony is the execution pipeline’s <em>only</em> workable path.</p>
+<h2
+id="spac-shard-protection-delivery-entropy-source-and-drbg-parity-with-the-dek">6.7
+SPAC Shard Protection: Delivery, Entropy Source, and DRBG Parity with
+the DEK</h2>
+<p>Status: design proposal.</p>
+<p>Back in Level 1’s mechanics, shardic envelope appeared as one of four
+sources for a shardic encryption key. A SPAC ceremony is where that
+choice really matters, because a SPAC’s protected action can be far more
+consequential than “a codeword holder reads a file” — arming a
+safety-critical system, releasing funds, granting account access. Two
+independent axes govern a trustee’s protection: <em>delivery</em> —
+memorized or shardic-envelope-wrapped — and <em>entropy source</em> — a
+human-shaped codeword stretched through a KDF, or a full-strength key
+drawn straight from an approved DRBG. A DRBG-sourced key forces delivery
+by shardic-envelope or shardware-token physical carriage. The reverse
+doesn’t hold: you can still wrap an ordinary codeword in an envelope for
+confidentiality in transit, just as the base scheme does today.</p>
+<p>For a SPAC ceremony, we default to the high-assurance end on both
+axes: a DRBG-sourced key from the same class of CSPRNG that generates
+the DEK, every mask, and every nonce, delivered via shardic-envelope and
+used directly as the trustee’s AES-256-GCM shard-protection key. That
+gives the trustee’s key parity with the 256-bit DEK it guards, instead
+of leaving the ceremony’s weakest gate roughly 150 bits below every
+other layer. We skip wordlist generation and KDF stretching entirely —
+neither helps a value that’s already uniformly random across the full
+key space.</p>
+<p>A named, lower-assurance opt-out remains: the memorized-codeword
+protection the demo implements today, generated and tuned as the
+codeword appendix describes. For a specific, recurring pattern it’s
+actually the better choice — no persistent key material to seize, no
+credential-lookup trust boundary to stand up, no private-key custody
+burden on the trustee, relayable over any channel with no device, and
+workable for trustees with no standing cryptographic tooling. The
+clearest example is a communications-denied or device-hostile field
+deployment — the same operational world the PAL precedent comes from.
+The codeword appendix makes the full case for each condition, works
+through the field example, and explains why the opt-out’s lower bit
+count is an acceptable trade: it faces a narrower, bounded attacker,
+unlike the DEK/AES-256-GCM layer’s unbounded, global-keyspace attacker —
+which is why we don’t hold the two to the same bar.</p>
+<h1 id="security-discussion">7. Security Discussion</h1>
+<p>By default, the codeword-strength concerns that open this discussion
+don’t apply: a shardic encryption key’s main source is a known-good
+entropy source. But shardic also supports KDF-derived codewords to cover
+the broadest range of CONOPS, so we lay out that analysis first, then
+show how shardic-envelope changes it. From there we turn to
+SPAC-specific concerns and bypass resistance, and close with NEAT — the
+framework we name for critical SPAC deployments, covering the ecosystem
+a deployment needs beyond the D-of-T guarantee itself.</p>
+<h2
+id="two-different-kinds-of-strength-key-length-vs.-trustee-threshold">7.1
+Two Different Kinds of Strength: Key Length vs. Trustee Threshold</h2>
+<p>Let’s be explicit about which parts of this design are
+information-theoretically secure and which are only computationally
+secure — they respond to completely different levers.</p>
+<ul>
+<li><p>The 256-bit DEK and its Shamir split are effectively
+unconditional. Below threshold D, shards carry zero information about
+the key regardless of computing power, and AES-256 has no known
+practical shortcut. Raising T or D changes how many parties must
+collude, not how hard any one shard is to attack — each is already
+effectively unbreakable.</p></li>
+<li><p>Each codeword, by contrast, is only as strong as its guessing
+space and KDF cost. That’s ordinary computational security, and sizing
+it is squarely the operator’s job. Because we trial-match shards
+independently, a higher D doesn’t compensate for weak codewords: an
+attacker only ever cracks D codewords, each on its own, never the full
+set at once.</p></li>
+</ul>
+<p>In short: more trustees strengthen the collusion requirement but do
+nothing for an individually weak codeword. Tune both knobs; neither
+substitutes for the other.</p>
+<h2 id="impact-of-shardic-envelope-and-ceremony-formation">7.2 Impact of
+shardic-envelope and Ceremony Formation</h2>
+<p>shardic-envelope changes what protects a codeword — a private key
+instead of human memory — so it changes the analysis above rather than
+sitting outside it. The direct win: no more memorability ceiling. A
+codeword that only has to survive one local decryption right before use
+can be arbitrarily long and high-entropy at no usability cost, pushing
+each KDF-derived key’s computational security as close as you like to
+the information-theoretic guarantee. That collapses the
+mode/length/count trade-offs the codeword appendix works through for the
+unwrapped case.</p>
+<p>The gain relocates trust rather than eliminating it. The trustee’s
+private key becomes a new single point of failure per shard, and
+credential resolution adds a new trust boundary. The ceremony’s
+separation-of-duties check directly mitigates one instance: an operator
+who forms a ceremony can’t also pick themselves as a trustee, which
+shuts down the most direct form of operator self-dealing. The SPAC
+design carries this trade-off forward — DRBG-sourced keys over
+shardic-envelope by default, with memorized codewords as a named
+opt-out, and the codeword appendix explains when that opt-out is the
+deliberately better choice and why its lower bit count holds up against
+the narrower threat it faces.</p>
+<h2
+id="security-considerations-specific-to-spac-path-trustees-and-human-ai-policy-gates">7.3
+Security Considerations Specific to SPAC, Path Trustees, and Human-AI
+Policy Gates</h2>
+<p>Be precise about ordered-participation claims. A receipt chain can
+give verifiable evidence that authenticated signers took part in a
+specified protocol sequence. Anything beyond that needs mechanisms built
+for the purpose. If you need to prove physical network transit, payload
+inspection, or trustee independence, layer in system components that
+support those claims. Bind receipts to a unique transaction, policy,
+predecessor, identities, time window, and endpoint; verify them
+server-side; reject replays; and keep independently protected audit
+evidence.</p>
+<p>A normal D-of-T reconstruction treats any D valid unsealed shards as
+equal peers. Requirements that span trustee classes — say, an AI
+sub-threshold plus a human sub-threshold — need separate gates or a
+vetted access-structure scheme, and the plumbing has to account for any
+policy on how each class’s shards enter the ceremony. Treat that
+composition logic as security-critical, deny by default, and test
+missing, stale, duplicate, invalid, and wrong-role contributions.</p>
+<p>An AI trustee is a bounded policy evaluator: objective and impartial,
+but no substitute for human judgment and accountability. Authenticate
+and audit its inputs, policy version, identity, attestation key, and
+output expiry. Ambiguous or conflicting evidence must fail closed. For
+many critical actions — especially irreversible ones — AI attestation
+shouldn’t be the sole enabler, and it should never be able to bypass the
+human quorum, endpoint binding, independent approver validation, or
+server-side authorization.</p>
+<p>Non-repudiation proves the defined act, not intent. Cryptographic
+reconstruction can record an authenticated contribution, but it doesn’t
+by itself resolve credential compromise, coercion, delegated access, or
+what a signature means legally. Document and mitigate those limits in
+the deployment CONOPS.</p>
+<h2
+id="bypass-resistance-software-vs.-hardware-anchored-enforcement">7.4
+Bypass Resistance: Software vs. Hardware-Anchored Enforcement</h2>
+<p>Any non-bypassability claim must say which bypass surface it covers.
+The closing summary’s claim that threshold recovery “cannot be bypassed
+by any administrator, insider, or software defect” holds for the
+cryptographic surface: fewer than the required number of genuine shards
+will never reconstruct the protected value, no matter who runs the
+system. What it can’t do is prove or enforce that a given deployment
+actually invokes the ceremony on its operational path.</p>
+<p>Of the four invocation patterns from the SPAC design, capability
+binding and the constrained state machine reduce risk but don’t prove
+anything. Both rest on the integrity of the code that enforces them, and
+a sufficiently privileged insider who can change that code can route
+around the ceremony as easily as around any other check. Only
+secure-element-internal sequencing and the physical interlock reach the
+same bar as the threshold math, because bypassing them means
+compromising the same tamper-resistant hardware boundary — or physically
+defeating a circuit — rather than editing software that runs outside
+it.</p>
+<p>If you adopt SPAC to meet a genuine non-bypassability requirement —
+as opposed to adding defense in depth — treat the software-only patterns
+as necessary but not sufficient. Choose a CONOPS and system design that
+uses secure-element-internal sequencing or a physical interlock wherever
+an undetected topological bypass would be unacceptable.</p>
+<h2 id="neat-a-design-framework-for-critical-spac-deployments">7.5 NEAT:
+A Design Framework for Critical SPAC Deployments</h2>
+<p>NEAT is shorthand for four properties a critical SPAC design must
+satisfy. They have a long pedigree: they’re the classic requirements for
+a <em>reference monitor</em> or <em>crypto function</em> in
+secure-systems design (tamperproof, always invoked, small enough to
+verify), extended here to cover SPAC. <strong>NEAT</strong> names
+them:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>States</th>
+<th>Where it comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>N — Non-bypassable</strong></td>
+<td>The ceremony is structurally positioned as the only path to the
+protected value or action — no side channel, maintenance mode, or
+alternate code path reaches the end state without going through it</td>
+<td>The four invocation patterns and the bypass-resistance analysis
+above</td>
+</tr>
+<tr>
+<td><strong>E — Evaluable</strong></td>
+<td>The mechanism enforcing the ceremony is small and simple enough to
+be independently verified and tested, not a sprawling bespoke system
+whose correctness has to be taken on faith</td>
+<td>New here</td>
+</tr>
+<tr>
+<td><strong>A — Always-invoked</strong></td>
+<td>Every recovery or arming attempt passes through the ceremony, with
+no exception path — no admin override, debug flag, or maintenance
+procedure reaches the end state a different way</td>
+<td>The constrained-state-machine pattern</td>
+</tr>
+<tr>
+<td><strong>T — Tamper-proof</strong></td>
+<td>The mechanism itself cannot be modified or subverted without
+compromising the same tamper-resistant boundary that protects the
+cryptographic material</td>
+<td>The hardware-anchored tiers and the bypass-resistance analysis</td>
+</tr>
+</tbody>
+</table>
+<p>NEAT is a <em>deployment</em> framework, not a cryptographic one. It
+doesn’t change the D-of-T guarantee, and a deployment that meets all
+four properties isn’t cryptographically stronger than one that doesn’t —
+it’s topologically and operationally more trustworthy, in the same sense
+that separates a cryptographic bypass surface from a topological one. A
+deployment can use the human-AI oversight pattern without meeting NEAT —
+the treasury and safety-interlock vignettes coming up do exactly that,
+at a risk-reduction level. NEAT is the bar for the subset of deployments
+where that gap is unacceptable.</p>
+<h3 id="non-bypassable">Non-bypassable</h3>
+<p>Does the ceremony sit on the only path to the end state, with no side
+channel around it? This is the topological question from the SPAC
+design: a system gets a cryptographic guarantee about the ceremony only
+if the ceremony sits on every route to the end state. The four patterns
+— capability binding, constrained state machine, secure-element-internal
+sequencing, physical interlock — rank by how strong a non-bypassability
+claim each supports, from “no path to the end state without the
+protected value” up to “bypass requires physically tampering with the
+interlock.” The bypass-resistance analysis above says which of them
+reach proof grade and which only reduce risk.</p>
+<h3 id="evaluable">Evaluable</h3>
+<p>A mechanism nobody can verify is one nobody should trust, however
+elegant. shardic’s claim here rests on scope discipline, not just size:
+every SPAC ceremony reuses, unmodified, a small, standards-based,
+publicly analyzable primitive — Shamir’s Secret Sharing over GF(256)
+plus AES-256-GCM — not a bespoke system. Any broader claim for SPAC
+stops at architecture-level reasoning: it reuses proven math instead of
+inventing new cryptography. If you adopt SPAC today, treat Evaluable as
+something the SPAC layer earns once code and independent review exist,
+not something it starts with.</p>
+<h3 id="always-invoked">Always-invoked</h3>
+<p>Does every recovery or arming attempt actually go through the
+ceremony, with no exceptions? This is narrower and more procedural than
+Non-bypassable. A system can make the ceremony the only structural path
+to the end state and still fail here if an admin override, debug flag,
+or maintenance procedure reaches that same end state another way for
+some cases. The constrained-state-machine pattern answers this directly:
+model the full operating sequence as an explicit graph with no edge to
+the end state that skips the ceremony, enforced by the same trust
+boundary that holds the ceremony’s ciphertext. A deployment that only
+adopts capability binding — the weakest tier — hasn’t fully earned this
+property, since a privileged actor can still edit the surrounding code
+to add an exception path. Secure design practices such as least
+privilege (LPP) and mandatory access control (MAC) can mitigate that
+risk.</p>
+<h3 id="tamper-proof">Tamper-proof</h3>
+<p>Can someone modify or subvert the mechanism itself? The
+bypass-resistance analysis already answers this. Capability binding and
+the constrained state machine reduce risk but rest on the integrity of
+the code that enforces them — a privileged insider who can change that
+code can change the enforcement. Only secure-element-internal sequencing
+and the physical interlock reach proof-grade tamper resistance, because
+defeating them means compromising the tamper-resistant hardware boundary
+or physically defeating a circuit. A NEAT-qualified critical deployment
+that relies on software-only patterns needs extra hardening elsewhere in
+the design.</p>
+<h3 id="neat-as-a-maturing-framework">NEAT as a maturing framework</h3>
+<p>We’ve laid out the four properties and why they matter for shardic,
+but we haven’t enumerated concrete employment models — that waits for an
+actual use case and a SPAC-enabled system to anchor it. What NEAT gives
+you now is the checklist any such example must pass, evaluated together:
+no route around the ceremony, a mechanism small and open enough to
+verify independently, no exception path that skips it, and no way to
+subvert it short of compromising the hardware boundary that protects the
+cryptographic material.</p>
+<h1 id="notional-missions-and-ceremony-lifecycle">8. Notional Missions
+and Ceremony Lifecycle</h1>
+<p>Status: illustrative, notional.</p>
+<p>The four vignettes that follow walk the full SPAC lifecycle against a
+concrete “as-is” baseline — in effect, “here’s what you can do under the
+SPAC umbrella.” The first two stay within product protection. The last
+two push into mission space beyond the file-vault core: network-path
+integrity, and hybrid human-AI decision governance — patterns the SPAC
+generalization makes possible. All trustee counts and thresholds are
+illustrative.</p>
+<h2
+id="vignette-a-escrowed-authorization-of-a-high-value-treasury-disbursement">8.1
+Vignette A: Escrowed Authorization of a High-Value Treasury
+Disbursement</h2>
+<p><strong>Mission.</strong> A financial institution’s treasury system
+may execute wires above a set threshold only with genuine,
+non-bypassable multi-party authorization, replacing a conventional
+dual-control approval workflow.</p>
+<p><strong>As-is baseline, to be improved by SPAC.</strong> Two named
+officers each approve a pending disbursement in a web app. Application
+logic and an audit log enforce the control entirely. One compromised
+admin account, a shared or hijacked session, or two approvers coerced
+under common pressure can produce two valid-looking approvals, with no
+cryptographic guarantee that either reflects genuine independent intent.
+The audit trail shows two accounts clicked “approve”; it can’t prove two
+independent human decisions happened.</p>
+<p><strong>Notional shardic-SPAC design:</strong></p>
+<ul>
+<li><p>PT SPAC: the treasury system’s high-privilege
+disbursement-signing credential.</p></li>
+<li><p>T=5 pool trustees (treasury officers), D=3 pool threshold, plus
+one Fielded Prime Element embedded in the treasury platform’s own
+HSM-backed appliance — no other machine can ever sign the disbursement,
+even with the same five officers.</p></li>
+<li><p>Approver: the controller function, independent of whoever runs
+vault creation, cryptographically attesting that the wrapped credential
+is the correct, currently authorized signing key.</p></li>
+<li><p>Ceremony formation: a standing, pre-formed quorum of treasury
+officers with an ordered backup list — no ad hoc convening at
+disbursement time.</p></li>
+<li><p>Operator: a compliance officer who authorizes each extraction
+request and can’t also be one of the five officer-trustees.</p></li>
+<li><p>Local custodian: a data-center technician holding a physical
+key-switch at the appliance.</p></li>
+<li><p>Delivery and RTO: network shard delivery, targeting an RTO of
+minutes.</p></li>
+</ul>
+<p><strong>Lifecycle walkthrough.</strong> <em>Approval</em> — the
+controller validates the signing credential in a test environment and
+signs a commitment to it. <em>Emplacement</em> — we wrap the credential
+as a CT SPAC, split it across the five officer-trustees and the
+appliance’s Fielded Prime Element, and destroy it everywhere else.
+<em>Fielded operation</em> — the appliance runs normally, holding only
+the CT SPAC. <em>Ceremony</em> — a disbursement above threshold notifies
+the standing quorum; three of five officers respond, the compliance
+officer authorizes the extraction grant, and the on-site custodian’s
+key-switch unlocks the Fielded Prime Element locally. <em>Arming</em> —
+the DEK reconstructs, the fast wrapped-MAC check confirms the credential
+matches the controller’s approval, the disbursement executes, and every
+secret value is zeroized immediately after.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>As-is (dual-control app logic)</th>
+<th>shardic-SPAC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protection</td>
+<td>Enforced by software/process; bypassable by whoever administers
+it</td>
+<td>Enforced by mathematics; below-threshold shards carry zero
+information regardless of administrator access</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>Silent failure modes possible if application logic has a bug</td>
+<td>Fail-loud: AES-GCM authentication rejects any incorrect or tampered
+value outright</td>
+</tr>
+<tr>
+<td>Assurance</td>
+<td>Audit log proves which accounts clicked approve, not which people
+independently chose to</td>
+<td>Non-repudiable: reconstruction is only possible if D independent
+trustees each supplied a genuine shard</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vignette-b-notional-safety-interlock-release-authorization">8.2
+Vignette B: Notional Safety-Interlock Release Authorization</h2>
+<p><strong>Mission.</strong> A notional platform’s safety interlock may
+move from safed to operational only when a release-enable value becomes
+available, and only through the deliberate, independent agreement of
+multiple authorized parties — the same organizational problem Permissive
+Action Links solve, described here purely at the level of the
+authorization ceremony.</p>
+<p><strong>As-is baseline, to be improved by SPAC.</strong> A physical
+lock or sealed code, held by one on-duty officer, released under a
+procedural two-person rule enforced by human witnesses rather than
+cryptography. One coerced or compromised person with physical access can
+potentially defeat a procedural control alone, and there’s no
+mathematically non-repudiable record of who authorized a release — only
+paper logs and witness statements, which can themselves be falsified or
+coerced.</p>
+<p><strong>Notional shardic-SPAC design:</strong></p>
+<ul>
+<li><p>PT SPAC: the notional release-enable value.</p></li>
+<li><p>T=5 pool trustees (a qualified duty crew), D=3 pool threshold,
+plus a Fielded Prime Element embedded in the platform’s own
+secure-element hardware.</p></li>
+<li><p>Local custodian factor: dual key-switches — two local factors
+instead of one — since a safety-critical interlock plausibly warrants
+the strongest local control available.</p></li>
+<li><p>Approver: an independent technical authority, separate from the
+operational chain, attesting that the embedded value is the correctly
+certified one.</p></li>
+<li><p>Ceremony formation: a standing, pre-formed, on-alert quorum,
+targeting an RTO of seconds to low minutes.</p></li>
+<li><p>Operator: a command-authority representative who authorizes the
+extraction grant — the cryptographic analog of an authorized release
+order.</p></li>
+</ul>
+<p><strong>Lifecycle walkthrough.</strong> <em>Approval</em> — the
+technical authority validates and signs a commitment to the
+release-enable value. <em>Emplacement</em> — we wrap the value as a CT
+SPAC, split it across the duty crew and the platform’s Fielded Prime
+Element, and destroy the plaintext everywhere else. <em>Fielded
+operation</em> — the platform holds only the CT SPAC, indefinitely, with
+no live dependency on the crew, operator, or network. <em>Ceremony</em>
+— an authorized release order convenes the standing duty crew; three of
+five respond, the command-authority operator authorizes the extraction
+grant, and both local key-switches turn together. <em>Arming</em> — the
+DEK reconstructs, the fast integrity check confirms the value matches
+the technical authority’s certification, the interlock changes state,
+and every secret value is zeroized immediately after.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>As-is (procedural two-person rule)</th>
+<th>shardic-SPAC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protection</td>
+<td>A single coerced/compromised individual with physical access is a
+structural risk</td>
+<td>Mathematically requires genuine independent agreement from D
+distinct trustees, not merely two people in a room</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>A wrong or substituted code may not be detected until use</td>
+<td>Fail-loud at multiple points: AES-GCM authentication, plus an
+independent approver-signed integrity check before the value is
+trusted</td>
+</tr>
+<tr>
+<td>Assurance</td>
+<td>Paper logs and witness statements, alterable or coercible after the
+fact</td>
+<td>A ceremony’s participant set is a fact about which independent
+parties each supplied a genuine cryptographic contribution — not a claim
+resting on anyone’s later testimony</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="vignette-c-trustee-attested-participation-along-a-trusted-network-path">8.3
+Vignette C: Trustee-Attested Participation Along a Trusted Network
+Path</h2>
+<p>This vignette sketches a protocol pattern layered on shardic — a
+concept with potential for enforcing data routing and exposure policy,
+not a claim that threshold sharing alone proves physical transit, route
+correctness, or content inspection.</p>
+<p><strong>Mission.</strong> Release a protected transfer only after a
+defined set of independent, authenticated network trustees have taken
+part in an ordered protocol. The goal is evidence of trustee
+participation and policy-controlled release — not a substitute for TLS,
+IPsec, routing security, or endpoint authorization.</p>
+<p><strong>Notional design.</strong> Each designated trustee node
+validates a transaction-bound request, its predecessor’s receipt, and
+the applicable policy before issuing its own signed receipt. Receipts
+carry a unique transaction ID, route-policy ID, predecessor commitment,
+trustee identity, timestamp, expiry, and a replay-resistant nonce. The
+receiver verifies the full ordered chain, every signature, freshness
+bounds, and the endpoint binding before releasing the protected action.
+A missing, duplicated, expired, invalid, or out-of-policy receipt halts
+everything, fail-closed.</p>
+<p><strong>Security boundary.</strong> A signed receipt proves its
+signer took part in the protocol. It doesn’t prove a human examined the
+payload, that the packet physically crossed a particular wire, or that a
+compromised trustee behaved honestly. Those assurances depend on the
+node implementation, key custody, attestation where available,
+independent logging, and the deployment’s threat model. Use end-to-end
+encryption and standard network controls alongside this pattern.</p>
+<p><img src="./media/trustee-attested-path-chain.png"
+style="width:5.2in;height:3.14in" /></p>
+<p><em>Trustee-attested network-path pattern.</em> An ordered,
+transaction-bound receipt chain records authenticated participation by
+designated trustees. The receiver verifies identity, predecessor
+commitment, freshness, route policy, and endpoint binding before
+release. A missing or invalid receipt halts the ceremony.</p>
+<p><strong>Lifecycle.</strong> An approver signs the transaction policy
+and content commitment. The origin creates a fresh, ceremony-bound
+request. Each trustee verifies the prior receipt and policy, then either
+adds a signed receipt or withholds it. The endpoint verifies the chain
+and its own local binding before requesting release. We log every denial
+and successful release with redacted, correlation-safe metadata, and
+zeroize secret material after use.</p>
+<h2 id="critical-use-case-enforcing-human-ai-mutual-oversight">8.4
+Critical Use Case: Enforcing Human-AI Mutual Oversight</h2>
+<p>Status: design proposal — an illustrative synthesis of the SPAC
+design and the hybrid policy-gate vignette that follows. No new
+cryptography.</p>
+<p>Two-Person Integrity, the closest precedent for a trustee threshold,
+assumed every party to a protected course of action was human. That
+assumption no longer holds. AI systems now propose, evaluate, or partly
+execute a growing share of the courses of action (COAs) a SPAC might
+gate — and the threshold construction needs nothing new to extend across
+that line. Cryptographically, a trustee is just a party that
+independently holds a shardic encryption key and decides whether to
+contribute it; the math doesn’t care whether that party is a person or a
+policy-bound software agent. Assign trustee classes deliberately — some
+slots human, some AI, combined by an explicit AND rule rather than
+blended into one threshold — and the same D-of-T guarantee enforces two
+distinct, opposite oversight problems:</p>
+<ul>
+<li><p><strong>Human-in-the-loop enforcement over an AI-initiated
+COA.</strong> An AI system proposes, or is positioned to launch, a
+consequential action — arming a capability, releasing funds, executing a
+decision. A SPAC ceremony that requires a threshold of independent human
+trustees means the action can’t run on the AI’s confidence, speed, or
+internal state alone, however certain the system is or however urgent
+things look. No sufficiently capable AI can argue its way around this,
+because it isn’t a policy: below threshold the DEK simply doesn’t exist,
+so no code path, prompt, or internal state rebuilds it without D humans
+each choosing to contribute.</p></li>
+<li><p><strong>AI validation as a check against a rogue human-initiated
+COA.</strong> Now flip it. A human trustee — or a colluding group below
+the human sub-threshold — is compromised, coerced, or mistaken, and
+tries to authorize an action that shouldn’t proceed. An independent AI
+evaluator gate, attesting only against allow-listed objective criteria
+applied to authenticated evidence, provides a check no amount of social
+engineering, seniority, or urgency can talk it out of. It either finds
+the criteria met by the actual evidence or fails closed, and no human
+trustee, however senior or persuasive, can override that finding from
+inside the ceremony.</p></li>
+</ul>
+<p>Neither direction makes shardic “smarter” — no anomaly detection, no
+learned policy, no model in the cryptographic path. Both come from the
+same information-theoretic guarantee, applied according to who fills
+which trustee slot: below threshold, a class of party carries zero
+information toward reconstruction on its own, so neither class can act
+alone, and neither can be talked, hacked, or hurried past the other. The
+next vignette walks this pattern through a full notional ceremony; the
+security discussion earlier covers its specific considerations and what
+NEAT adds for a <em>critical</em> instance beyond the threshold
+math.</p>
+<p>An AI evaluator is a bounded, auditable policy check, not an
+autonomous authority. In either direction, it’s one evaluation gate
+among several server-side checks — not normally the sole enabler, and
+for irreversible COAs never a substitute for the human threshold it
+either feeds or guards against.</p>
+<h2
+id="vignette-d-hybrid-human-and-ai-policy-gates-for-spac-authorization">8.5
+Vignette D: Hybrid Human-and-AI Policy Gates for SPAC Authorization</h2>
+<p>This is a notional governance and protocol design. An AI evaluator
+has no autonomous authority to perform a high-consequence action.</p>
+<p><strong>Mission.</strong> A SPAC-gated capability needs both
+objective checks and accountable situational judgment. Automated
+evaluators apply narrow, pre-approved criteria to authenticated inputs;
+human trustees decide whether the action fits the context and
+independently choose whether to take part.</p>
+<p><strong>Notional design.</strong> Objective and subjective conditions
+are separate, explicit gates:</p>
+<ul>
+<li><p>An AI policy evaluator issues a signed, time-limited attestation
+only when its allow-listed criteria are met. Ambiguity, invalid inputs,
+stale telemetry, conflicting sources, or evaluator failure produce no
+attestation.</p></li>
+<li><p>A distinct human trustee ceremony requires its own threshold of
+authenticated human contributions. The release service verifies both
+gates server-side before it reconstructs or releases the SPAC
+value.</p></li>
+</ul>
+<p>The separation matters: a single ordinary D-of-T Shamir split can’t
+encode class-specific requirements like “all three AI checks and any two
+humans.” Implement that policy with separate cryptographic gates or a
+vetted access-structure construction, then combine them with an explicit
+AND rule. If you want, you can push finer-grained conditions down into
+the cryptographic reconstruction flow too — mapping each objective
+measure to its own agent for enforcement, and spreading the subjective
+evaluation across one or more human trustees.</p>
+<p><img src="./media/hybrid-ai-human-policy-gates.png"
+style="width:5.2in;height:4.5in" /></p>
+<p><em>Hybrid human-and-AI policy gates.</em> A bounded AI evaluator
+attests only when allow-listed objective criteria are met from
+authenticated evidence; an independent human trustee ceremony supplies
+situational judgment. The release service enforces an explicit AND rule
+across both gates and all server-side checks.</p>
+<p><strong>AI controls.</strong> AI evaluators must work only on
+authenticated, provenance-recorded data; expose the policy version,
+evidence IDs, a confidence-independent pass/fail result, and expiry;
+stay independently auditable; and have no authority to waive a missing
+human threshold. Training data, model behavior, and evaluation
+infrastructure remain attack surfaces in their own right, with their own
+governance, change control, monitoring, and rollback plan.</p>
+<p><strong>Lifecycle.</strong> The approver signs the ceremony template,
+objective-policy version, and protected-value commitment. The AI gate
+evaluates its defined evidence and either attests or fails closed. Human
+trustees receive the request context and the AI gate’s status, then
+independently contribute or withhold. The server verifies both
+thresholds, the Fielded Prime Element where applicable, identity and
+freshness controls, and the approver commitment. Only then does the
+action proceed; we zeroize all secret values and log the event.</p>
+<h1 id="summary">9. Summary</h1>
+<h2 id="what-sets-this-apart-from-conventional-symmetric-encryption">9.1
+What Sets This Apart From Conventional Symmetric Encryption</h2>
+<p>Conventional symmetric encryption answers “how do we keep this
+secret?” shardic answers a different question: “how do we make sure no
+single party can expose this secret — or invoke this capability —
+alone?” The primitives underneath — AES-256-GCM, a KDF, random key
+material — are entirely standard. What’s different is the structure of
+control on top: no single party can ever extract the protected value,
+because we never store it whole. It exists only briefly, in memory, once
+enough independent parties have each chosen to contribute their shard —
+whether that value decrypts a file, arms a protected action, attests to
+a payload’s network transit, or satisfies a hybrid
+objective-and-subjective authorization gate.</p>
+<p>Math beats policies and permissions. Access-control policies,
+multi-approval workflows, and organizational procedure layered on
+ordinary encryption all run on software or process, so whoever
+administers them can bypass them. Threshold recovery below D trustees
+runs on mathematics — no administrator, insider, or software defect in
+the recovery tool can bypass it.</p>
+<p>That property is what makes the human-AI oversight case possible at
+all. Spread trustee slots across human and AI classes, and the same
+D-of-T guarantee becomes mutual oversight: an AI-initiated course of
+action can’t execute without independent human agreement, and a rogue or
+coerced human-initiated one can’t execute without an independent AI
+evaluator’s attestation. NEAT names what a deployment needs beyond the
+math for that guarantee to survive real operational and adversarial
+conditions.</p>
+<h2 id="advantages">9.2 Advantages</h2>
+<ul>
+<li><p><strong>No lone-actor risk.</strong> Recovery below the trustee
+threshold is mathematically impossible, not just procedurally
+discouraged.</p></li>
+<li><p><strong>Graceful tolerance of trustee loss.</strong> Any D of T
+suffice, so the design survives up to T − D unavailable, incapacitated,
+or uncooperative trustees.</p></li>
+<li><p><strong>Zero metadata leakage.</strong> The vault file alone
+reveals no trustee-to-shard mapping, even under direct inspection or
+partial compromise.</p></li>
+<li><p><strong>Self-describing recovery.</strong> The KDF method and
+parameters travel with the vault, so recovery never depends on external
+configuration matching creation.</p></li>
+<li><p><strong>A mandatory-signer variant.</strong> shardic-prime covers
+cases where one specific role must always take part, without weakening
+the underlying guarantees — and that role generalizes to a
+hardware-embodied Fielded Prime Element with no new math.</p></li>
+<li><p><strong>Fail-closed throughout.</strong> Insufficient or wrong
+shardic encryption keys, missing KDF dependencies, and corrupted
+containers all get reported explicitly and stop the operation. No
+silent-degradation path produces partial or misleading output.</p></li>
+<li><p><strong>Generalizes past file decryption.</strong> The guarantee
+that protects a vault’s plaintext can gate any protected action,
+network-path attestation, or hybrid human-AI authorization ceremony,
+with the fielded-system binding and approver mechanisms needed to do it
+safely already designed.</p></li>
+<li><p><strong>Composable trustee classes enforcing mutual
+oversight.</strong> AI agents enforcing formally defined objective
+criteria, hardware relay nodes attesting to path integrity, and human
+trustees supplying irreplaceable situational judgment can all join the
+same threshold framework, with the math ensuring no class can act
+without the others. No policy or workflow layer can match that — and
+it’s the specific basis for gating an AI-initiated action on independent
+human agreement, and a human-initiated one on independent AI
+validation.</p></li>
+</ul>
+<h2 id="limitations-and-mitigations">9.3 Limitations and
+Mitigations</h2>
+<ul>
+<li><p><strong>Static, split-once core.</strong> Revoking or replacing a
+single trustee means a full re-split and redistribution of a new vault;
+there’s no live key rotation or online quorum protocol.
+<em>Mitigation:</em> we scope the tool to rare, high-stakes, offline
+break-glass access and deliberate-ceremony SPAC arming. For frequent or
+live multi-party authorization, use threshold-signature schemes
+(e.g. FROST) or HSM-backed multisig.</p></li>
+<li><p><strong>One container, one availability risk.</strong> The
+<code>.krypt</code> container — and so a CT SPAC bundle — is a single
+point of availability failure, even though it isn’t a single point of
+access failure. <em>Mitigation:</em> back it up durably; there’s only
+one artifact to protect.</p></li>
+<li><p><strong>Bounded scale.</strong> The implementation caps out at
+255 shards — sensible, since real operations top out at double-digit
+trustee counts. <em>Mitigation:</em> use it where it fits; the ceiling
+is an operational-practicality boundary, not a cryptographic
+one.</p></li>
+<li><p><strong>SPAC is still a design.</strong> It’s a new foundational
+capability, but several parameters remain open: the concrete
+local-unlock factor category per deployment, the specific
+PUF/secure-element hardware to target, and the wire format for
+extraction-grant certificates. <em>Mitigation:</em> none of these gaps
+touch the cryptographic core every SPAC construction reuses unmodified —
+they’re integration and deployment decisions, not open cryptographic
+questions.</p></li>
+<li><p><strong>AI trustee data-feed integrity is an open
+question.</strong> The hybrid human-AI model depends on authenticated
+data feeds for AI trustees to evaluate. We haven’t yet designed the
+feed-authentication architecture, AI trustee agent hardening, or the
+wire format for AI trustee shard contributions. <em>Mitigation:</em>
+treat AI trustee agents as shardware-token equivalents and require
+multi-source feed authentication as a design constraint from day
+one.</p></li>
+<li><p><strong>Path-trustee chain liveness.</strong> An all-of-N (D = T)
+path-trustee configuration can’t tolerate an unavailable relay node.
+<em>Mitigation:</em> register alternate-route trustees at ceremony
+formation for any hop where availability matters, and set D &lt; T where
+path-integrity enforcement can tolerate a redundant route.</p></li>
+</ul>
+<p>Read these limitations as the boundary of the problem the design
+solves — rare, high-stakes recovery and authorization that require
+genuine multi-party agreement — not as defects. The core guarantee
+stands on solid ground, whether it protects a file’s plaintext, a
+protected action’s enabling code, a network payload’s chain of custody,
+or a high-consequence authorization that must be both objectively
+verified and humanly judged: fewer than D independently held
+contributions will never bring that value into existence, and that
+guarantee doesn’t degrade, weaken, or silently fail under any failure
+mode the design considers.</p>
+<h2 id="footnotes">Footnotes</h2>
+<p>* Conservative withholding policy (hybrid policy-gate vignette):
+ambiguous, conflicting, or unavailable AI trustee data-feed inputs cause
+shard withholding rather than contribution.</p>
+<p>† In the representative hybrid policy-gate configuration, any 2 of 4
+human trustees satisfy D_H. The other 2 can withhold without blocking
+reconstruction, as long as D_AI is also met.</p>
+<p>‡ The combiner verifies the combined receipt set from the
+network-path vignette independently of each node’s local verification. A
+node can’t produce a valid C_n without the predecessor’s actual signed
+output.</p>
+<p>§ The combined reconstruction gate at Tier 3 of the hybrid
+policy-gate figure is a defensive invariant check. If both Tier 2
+sub-threshold gates passed, it’s algebraically guaranteed to pass for
+the representative configuration shown.</p>
+<h1 id="appendix-a-shamirs-secret-sharing-explained">Appendix A:
+Shamir’s Secret Sharing, Explained</h1>
+<p>The main text covers Shamir’s Secret Sharing (SSS) at the depth
+needed to follow the paper. This appendix is the complete, standalone
+treatment, adapted from <code>docs/sss_explained_for_shardic.md</code>
+in the project repository so the paper stands on its own. For a
+code-grounded walkthrough of the same material — actual function names,
+data shapes, and line-level detail, extended through shardic-envelope
+and SPAC — see the companion
+<code>docs/shardic-cryptographic-path.md</code>. This appendix
+deliberately stays conceptual, so the two complement rather than
+duplicate each other.</p>
+<h2 id="a.1-the-problem-it-solves">A.1 The Problem It Solves</h2>
+<p>Say you have a secret — a key, a password, a number — and you want to
+split it among several people so that:</p>
+<ul>
+<li>Any <strong>D</strong> of them together can reconstruct it
+exactly.</li>
+<li>Any group smaller than <strong>D</strong> learns <em>nothing</em>
+about it — not even a probabilistic edge.</li>
+</ul>
+<p>That’s a <strong>(D, T) threshold scheme</strong>: T total shards, D
+needed to recover. Adi Shamir solved it in 1979 with a simple fact from
+algebra: <strong>a polynomial of degree D−1 is uniquely determined by D
+points, and completely undetermined by any fewer.</strong></p>
+<h2 id="a.2-the-intuition-before-the-math">A.2 The Intuition, Before the
+Math</h2>
+<p>It’s worth seeing <em>why</em> this works before the formula, because
+the obvious first guess at “splitting a secret into pieces” isn’t it —
+and doesn’t have the properties above.</p>
+<p><strong>The obvious guess, and why it falls short.</strong> Cut a key
+into equal chunks and give one to each trustee — or do the cleverer XOR
+split, where every shard is random except the last, chosen so they all
+XOR back to the key. Both can be information-theoretically sound in the
+narrow sense that fewer than all pieces reveal nothing. But both are
+<strong>all-or-nothing</strong>: reconstruction needs every piece, with
+no way to ask for “any D of T.” Lose one trustee for good, and the
+secret is gone forever — exactly the fragility a threshold scheme exists
+to avoid.</p>
+<p><strong>The actual idea: hide the secret as a point only enough hints
+can locate.</strong> Picture the secret not as bytes but as the spot
+where a straight line crosses the vertical axis. Draw that line so it
+also passes through T other points, one per trustee. One trustee’s point
+tells them nothing: infinitely many lines pass through it, each crossing
+the axis somewhere different, so <em>every</em> secret stays equally
+possible. Put any <strong>two</strong> trustees’ points together,
+though, and exactly one line passes through both — so there’s exactly
+one crossing. Two points fix a line; that’s what makes D = 2 work.</p>
+<p><img src="./media/sss-geometric-intuition.png"
+style="width:5.2in;height:2.33in" /></p>
+<p>Raise the threshold to three and the trick generalizes: swap the line
+for a curve with one more bend (a parabola), which takes three points to
+pin down. One or two points still leave every secret equally plausible.
+In general, a threshold of D is a curve that needs exactly D points to
+fix, with T points handed out, one per trustee, all on the same curve.
+Because <em>any</em> D of the T points will do — not a specific D, and
+not all T — the scheme absorbs losing up to T − D trustees, which no
+all-or-nothing chunk or XOR split can offer.</p>
+<p>That curve is a polynomial. Next, we make it precise.</p>
+<h2 id="a.3-the-precise-construction">A.3 The Precise Construction</h2>
+<p>You know the geometric version from precalculus: two points fix a
+line (degree 1), three fix a parabola (degree 2). In general, <strong>D
+points determine a unique polynomial of degree D−1</strong> — no more,
+no fewer. Shamir’s insight: hide the secret as the <em>constant
+term</em> of such a polynomial, then hand out points on its curve as
+shards.</p>
+<ol type="1">
+<li><p>To split a secret <code>S</code> into T shards with threshold D,
+build a polynomial of degree D−1:</p>
+<p><code>f(x) = S + a₁x + a₂x² + ... + a_(D-1)x^(D-1)</code></p>
+<p>where <code>a₁, ..., a_(D-1)</code> are <strong>random
+coefficients</strong>, and the constant term is the secret:
+<code>f(0) = S</code>.</p></li>
+<li><p>Generate T shards by evaluating the polynomial at T distinct
+nonzero x-values:</p>
+<p><code>shard_i = (i, f(i))</code> for
+<code>i = 1, 2, ..., T</code></p></li>
+<li><p>Give one <code>(x, f(x))</code> point to each of the T
+trustees.</p></li>
+</ol>
+<p><strong>Reconstruction:</strong> take any D of these points, fit the
+unique degree-(D−1) polynomial through them with <strong>Lagrange
+interpolation</strong>, and evaluate it at <code>x = 0</code> to get
+<code>f(0) = S</code>.</p>
+<h2 id="a.4-why-fewer-than-d-shards-reveal-nothing">A.4 Why Fewer Than D
+Shards Reveal Nothing</h2>
+<p>This is what separates SSS from “encryption” in the usual sense: with
+too few shards, breaking it isn’t computationally hard — it’s
+<strong>information-theoretically impossible</strong>.</p>
+<p>With only D−1 points, infinitely many degree-(D−1) polynomials pass
+through them — one for <em>every possible value</em> of
+<code>f(0)</code>. Every candidate secret fits the data equally well.
+You haven’t narrowed the search at all; you’ve learned literally zero
+bits about <code>S</code>. That’s far stronger than most cryptography,
+which rests on a hard problem (factoring, discrete log) that a smarter
+algorithm or bigger computer could in principle crack. Here there’s
+nothing to crack — the information just isn’t in D−1 shards.</p>
+<p>It also means there’s no partial progress. A combination lock rewards
+partial knowledge — get two of three digits and you’re close. A
+threshold scheme doesn’t. D−1 points don’t narrow the secret to a short
+list; they leave <em>every</em> value exactly as plausible as before. No
+“getting warmer,” no ruling out candidates one collusion at a time. The
+D<sup>th</sup> point doesn’t refine the answer — it’s the moment the
+answer springs into existence.</p>
+<h2 id="a.5-why-gf256-instead-of-real-numbers">A.5 Why GF(256) Instead
+of Real Numbers</h2>
+<p>Do this arithmetic over the real numbers and you hit two problems:
+fractions creep into Lagrange interpolation, and floating-point rounding
+silently corrupts the secret. So SSS runs over a <strong>finite
+field</strong> instead — a closed, exact number system with no
+rounding.</p>
+<p>shardic uses <strong>GF(256)</strong>, the finite field with 256
+elements, which maps one field element to exactly one byte (2⁸ = 256).
+Every operation — polynomial evaluation, interpolation — stays inside
+the field, so shards and reconstructed secrets are exact bytes with no
+precision loss. That’s also <em>why</em> GF(256) has a hard ceiling:
+there are only 255 usable nonzero x-coordinates (0 is reserved for the
+secret), so you can’t issue more than 255 distinct shards without
+colliding x-values or moving to a bigger field (GF(2¹⁶)) or a
+prime-field construction. It’s not a setting — it’s the size of the
+number system.</p>
+<h2 id="a.6-how-this-becomes-shardic">A.6 How This Becomes Shardic</h2>
+<p>shardic doesn’t split your <em>file</em> with SSS — it splits the
+<strong>encryption key</strong>.</p>
+<ol type="1">
+<li>We encrypt your file with <strong>AES-256-GCM</strong> under a
+random <strong>Data Encryption Key (DEK)</strong>. That’s fast, standard
+symmetric encryption; SSS never touches bulk data, because polynomial
+math over GF(256) doesn’t scale efficiently to megabytes.</li>
+<li>The 256-bit DEK becomes the secret <code>S</code> in Shamir’s
+construction, split into T shards at threshold D — any D trustees can
+rebuild the DEK; fewer can’t, even in principle.</li>
+<li>A memorable <strong>codeword</strong>, run through a KDF (Argon2id
+or PBKDF2), further protects each shard, so holding the raw shard bytes
+isn’t enough — you also need the memorized word.</li>
+<li>At recovery, once D correct codewords unlock D shards, Lagrange
+interpolation rebuilds the DEK and AES-GCM decrypts the file.</li>
+</ol>
+<p>So two independent layers stack up: <strong>AES-GCM</strong> protects
+the bulk data computationally (hard to break, not impossible in
+principle), while <strong>Shamir’s Secret Sharing</strong> protects the
+<em>key itself</em> information-theoretically (impossible with too few
+shards, full stop, regardless of computing power).</p>
+<h2 id="a.7-where-shardic-extends-the-textbook-scheme">A.7 Where Shardic
+Extends the Textbook Scheme</h2>
+<p>shardic adds a few things on top of vanilla SSS that weren’t part of
+Shamir’s 1979 construction:</p>
+<ul>
+<li><strong>Zero-leakage indexing.</strong> A naive implementation
+stores a mapping like “codeword A → shard 3” for convenience. shardic
+doesn’t — it trial-matches each entered codeword against every unmatched
+shard record, using the AES-GCM authentication tag as a correctness
+oracle. So the metadata leaks nothing about which codeword goes with
+which shard, closing a side channel a naive design would leave
+open.</li>
+<li><strong>shardic-prime.</strong> A variant that makes one trustee the
+<em>mandatory prime trustee</em> — reconstruction fails without their
+codeword, no matter how many pool trustees show up. Pure threshold SSS
+can’t do this (it treats all D-of-T combinations as equal), so
+shardic-prime adds a one-time-pad-style mask over the ordinary Shamir
+split.</li>
+<li><strong>Entropy transparency.</strong> The system warns you, rather
+than silently degrading, if your KDF parameters or codeword strength
+fall below a safe threshold — a UX layer around the crypto, not a change
+to the math.</li>
+</ul>
+<h2 id="a.8-the-one-sentence-summary">A.8 The One-Sentence Summary</h2>
+<p>Shamir’s Secret Sharing turns “split a secret among T people, any D
+of whom can recover it” into a simple geometric fact — a degree-(D−1)
+polynomial needs exactly D points to pin down — and shardic uses that
+fact to protect not your file directly but the single key that unlocks
+it, so access requires genuine cooperation among trustees rather than
+trust in any single point of failure.</p>
+<h1
+id="appendix-b-codeword-mode-selection-tuning-and-the-field-deployment-case">Appendix
+B: Codeword-Mode Selection, Tuning, and the Field-Deployment Case</h1>
+<p>The main text names KDF-from-a-memorized-secret as one of four
+sources for a shardic encryption key, and notes that a SPAC ceremony
+defaults away from it toward a DRBG-sourced key delivered by
+shardic-envelope. This appendix fills in the rest. First, how to
+generate and tune a codeword — which applies to the base scheme
+generally, not just SPAC. Then, the full case for deliberately choosing
+the codeword opt-out in a SPAC deployment, followed by why its lower bit
+count is an acceptable trade against the narrower threat it actually
+faces.</p>
+<h2 id="b.1-codeword-modes-security-and-usability-trade-offs">B.1
+Codeword Modes: Security and Usability Trade-offs</h2>
+<p>You can generate codewords in three modes, trading ease of recall
+against entropy per character:</p>
+<h3 id="memorable-mode-default">Memorable mode (default)</h3>
+<p>Draws whole, real words of any length from a dictionary — by default,
+the bundled EFF long wordlist (7,772 words, ~12.9 bits/word). This is
+classic diceware: real words tap semantic memory in a way synthetic
+syllables don’t, so a trustee can actually recall a phrase instead of
+storing it. Per word, it’s also the strongest mode — a larger,
+unfiltered pool beats a length-filtered one.</p>
+<h3 id="dictionary-mode">Dictionary mode</h3>
+<p>Draws words of exactly a given length from a supplied wordlist file.
+Useful when every codeword should look uniform, but filtering a
+natural-language dictionary to one length typically leaves only hundreds
+to low thousands of candidates — roughly 8–11 bits per word, noticeably
+weaker than memorable mode.</p>
+<h3 id="synthetic-mode">Synthetic mode</h3>
+<p>Generates pronounceable random words from an alternating
+consonant/vowel pattern at a given length, with no dictionary. That
+yields far more combinations per length than any natural-language
+dictionary (roughly 3.36 bits per character from the base alphabet
+sizes), but the syllables mean nothing, so they’re denser yet harder to
+remember than real words of the same length.</p>
+<p>In every mode, word count is what builds a real security margin —
+each extra word roughly multiplies the guessing space.</p>
+<h2 id="b.2-tuning-options">B.2 Tuning Options</h2>
+<p>Beyond mode and word count, two more levers match protection to your
+threat model and operating constraints. <strong>KDF choice and
+cost:</strong> Argon2id’s memory-hardness resists parallel GPU/ASIC
+guessing far better than PBKDF2 at the same wall-clock cost.
+<strong>Trustee count and threshold:</strong> raising T − D increases
+tolerance for lost or unavailable trustees; raising D relative to T
+raises the collusion bar, at the cost of needing more participants for
+every legitimate recovery. Because we fix the KDF at creation and record
+it in the vault’s metadata, recovery always applies exactly the
+creation-time settings — no fallback, negotiation, or KDF downgrade
+attack is possible afterward.</p>
+<h2 id="b.3-the-spac-field-deployment-opt-out">B.3 The SPAC
+Field-Deployment Opt-Out</h2>
+<p>A SPAC ceremony defaults to a DRBG-sourced key delivered via
+shardic-envelope, with the memorized codeword as a named opt-out. Here’s
+the fuller case for that opt-out.</p>
+<p>It’s defensible — not merely tolerated — because the DEK/AES-256-GCM
+layer and the codeword layer don’t face the same adversary:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Adversary</th>
+<th>Search space</th>
+<th>Why the required strength differs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DEK / AES-256-GCM</td>
+<td>Holds only CT SPAC, no other angle of attack</td>
+<td>Full, unstructured 256-bit keyspace</td>
+<td>Nothing else stands between this attacker and the plaintext — the
+only layer that must resist a global keyspace search</td>
+</tr>
+<tr>
+<td>Codeword / shard record</td>
+<td>Holds one stolen or leaked shard record</td>
+<td>Bounded, structured — a wordlist and word count, Argon2id-stretched
+per guess</td>
+<td>Success yields one D-of-T point, worthless below threshold; the
+search is real but bounded and cost-amplified, not global</td>
+</tr>
+</tbody>
+</table>
+<p>Pure-memory codewords stay available — named explicitly, not quietly
+deprecated, generated as described above and protected by
+PBKDF2/Argon2id exactly as implemented today — as a
+<strong>lower-assurance opt-out</strong> for deployments where this
+trade is right for the CONOPS. It’s the <em>better</em> choice, not just
+an acceptable one, when:</p>
+<ul>
+<li><strong>No persistent key material should exist to seize.</strong> A
+device holding a DRBG-sourced key, even envelope-wrapped, is a physical
+artifact someone can forensically image. A memorized codeword leaves
+nothing on any device, anywhere.</li>
+<li><strong>A credential-lookup trust boundary isn’t worth standing
+up.</strong> Envelope delivery depends on resolving “this trustee’s
+current public key” through some directory or lookup service — a new
+attack surface in itself, since a spoofed or compromised lookup would
+silently wrap a high-entropy key to the wrong recipient. A codeword
+needs no such lookup.</li>
+<li><strong>Trustees shouldn’t carry a private-key custody
+burden.</strong> A DRBG-sourced key is only as confidential as the
+trustee’s continued, exclusive hold on an unwrapping private key; lose
+it and the shard is gone, with no “try to remember” fallback. A codeword
+has no equivalent single point of failure to back up, rotate, or
+lose.</li>
+<li><strong>The value must travel over any channel, with no
+device.</strong> You can speak a codeword over the phone, write it on
+paper, or pass it by courier with zero technology at any step. A
+DRBG-sourced key needs a capable device at generation, at rest, and at
+unwrapping.</li>
+<li><strong>The trustees have no standing cryptographic tooling or
+habits.</strong> A codeword asks “can you hold a memorized phrase?”; a
+DRBG-sourced key asks “can you safely custody a private key?” — a much
+higher bar for a duty crew, an estate’s non-technical relative, or any
+trustee pool that doesn’t already work as cryptographic identities.</li>
+<li><strong>Setup friction must stay minimal for a short-lived or ad hoc
+ceremony.</strong> A codeword skips keypair generation,
+candidate-directory registration, and fingerprint verification entirely
+— relevant wherever the RTO/CONOPS analysis already favors low convening
+friction over entropy headroom.</li>
+</ul>
+<p>A concrete case pulls several of these together: a SPAC pool trustee
+operating in a communications-denied or device-hostile field environment
+— the same world the Permissive Action Link precedent comes from. A
+device holding a shardic-envelope-wrapped or DRBG-sourced credential is
+a physical artifact: it can be seized, imaged, or used as evidence of
+the trustee’s role or affiliation, whether or not anyone ever decrypts
+the envelope inside. A memorized codeword leaves nothing to seize,
+image, or subpoena, and the trustee can relay it over whatever channel
+is available, including a single verbal exchange. It also dodges an
+availability risk unique to device custody: hardware has to survive
+intact, undamaged, and unconfiscated from emplacement to some
+unpredictable moment of use — in exactly the kind of environment that
+already trades availability for air-gap independence. PAL-class systems
+have long favored memorized or verbally relayed codes for this reason,
+well before threshold cryptography; a SPAC deployment with the same
+operational profile has the same reason to opt out of the
+shardic-envelope/DRBG default.</p>
+<h2
+id="b.4-why-2100-is-enough-for-this-threat-even-though-it-isnt-2256">B.4
+Why ~2^100 Is Enough for This Threat, Even Though It Isn’t 2^256</h2>
+<p>It’s tempting to set the codeword opt-out’s bit count against the
+DEK’s 256 bits and call it weaker. That comparison measures the wrong
+thing: it treats two defenses against two different attackers as if they
+had to clear the same bar.</p>
+<p>The DEK/AES-256-GCM layer faces an attacker with no other angle:
+holding only ciphertext, they face the full, unstructured 256-bit
+keyspace with no shortcut. It’s the only layer that has to survive an
+unbounded, global search, so it has to be unconditionally strong.</p>
+<p>A codeword faces a much narrower attacker: someone who already has
+one stolen or leaked shard record and is trying to crack just that one.
+Three structural facts bound this attack in ways the DEK’s threat model
+doesn’t share:</p>
+<ol type="1">
+<li><strong>The search space is combinatorial, not a raw
+keyspace.</strong> The <code>--memorable</code> default (8 words from
+the EFF long wordlist, ~12.9 bits/word) gives roughly 103 bits before
+any KDF cost — call it 2^100.</li>
+<li><strong>One cracked record is worth exactly one D-of-T
+point.</strong> Below threshold, that’s zero information about the DEK,
+however many records the attacker collects this way. That doesn’t mean a
+higher D compensates for a weak codeword — each still has to clear its
+own floor — but it does mean the <em>consequence</em> of cracking one is
+bounded in a way the DEK’s threat model has no analog for.</li>
+<li><strong>Argon2id’s memory-hardness makes each guess expensive, and
+it resists exactly the scaling that would matter here.</strong> At this
+project’s default cost (256 MiB, time cost 4, parallelism 4), a guess
+isn’t a cheap hash — it’s a fixed, unavoidable memory allocation per
+attempt, which is precisely what blocks the massive GPU/ASIC parallelism
+that makes a moderate, unstretched keyspace tractable.</li>
+</ol>
+<p>Put numbers on it. Grant an attacker a wildly generous, deliberately
+unrealistic 10^12 fully Argon2id-stretched guesses per second against
+this configuration. Exhausting a 2^100 space (~1.27×10^30 guesses) still
+takes on the order of 10^18 seconds — roughly 30 billion years. And
+10^12 guesses/second at 256 MiB each implies sustained memory bandwidth
+around 250 exabytes per second, many orders of magnitude beyond the
+combined bandwidth of the world’s fastest supercomputers. That’s not a
+“beyond current hardware” caveat; it’s a physical-plausibility ceiling
+built into the assumption. Any realistic Argon2id cracking rate sits
+many more orders of magnitude below that impossible starting point.</p>
+<p>That’s the real basis for the trade. The attacker this layer faces
+was never going to approach the edge of a 2^100 space, so the nominal
+gap to 256 bits isn’t the number that matters — time-to-crack against
+the real, bounded, memory-hard attack is. Sizing the floor up (more
+words, higher Argon2id cost) is still worthwhile wherever you can absorb
+the extra recall or wall-clock burden, per the tuning guidance above —
+but that’s headroom on a floor that’s already adequate, not a fix for an
+inadequate one.</p>
+<h2 id="b.5-is-eight-real-words-a-realistic-memorization-target">B.5 Is
+Eight Real Words a Realistic Memorization Target?</h2>
+<p>The cryptographic case only holds if a trustee can actually retain an
+8-word codeword well enough to use it. Otherwise, the opt-out trades a
+real security floor for one that quietly erodes as people forget,
+mistype, or improvise. Note that this is a narrower claim than one this
+project has already answered <em>no</em> to: an untrained person can’t
+realistically hold genuine 256-bit-class entropy in unaided memory —
+which is exactly why shardic-envelope exists, and we don’t dispute it
+here. The <code>--memorable</code> default targets roughly 2^100 — 8
+real words — a much smaller, more ordinary ask.</p>
+<p>The relevant memory task is long-term retention through rehearsal,
+not one-shot recall. Nobody asks a trustee to hear eight random words
+once and recite them back. The finding usually cited to dismiss this —
+Miller’s “seven, plus or minus two” — is about <em>working memory</em>
+holding unrehearsed items for immediate use, and it doesn’t describe
+what a standing trustee does. That’s closer to how people keep a bank
+PIN, a home alarm code, or a memorized passage: ordinary, periodic
+repetition until it consolidates into long-term memory. Real words help
+precisely because they mean something. A trustee can turn eight words
+into a short mental sentence or image — a strategy most people use
+unprompted for shorter lists (nobody needs training to remember a
+five-item grocery list by picturing a scene), and a world away from the
+competition-grade method of loci memory athletes use for long,
+meaningless, exact-order sequences.</p>
+<p>This word count isn’t novel, either — it sits inside a range backed
+by two decades of real-world practice. Diceware, the direct ancestor of
+<code>--memorable</code> mode, has long recommended “the longest
+passphrase you feel comfortable remembering,” suggests six words as the
+standard target, and for its own long-term (10+ year) case recommends
+ten — explicitly split into two five-word chunks <em>for
+memorization</em>. Eight real words fits comfortably inside that
+range.</p>
+<p>The counter-evidence deserves a direct answer, since one well-known
+precedent seems to point the other way: BIP39 cryptocurrency seed
+phrases. Standard guidance says to write them down — on paper or metal,
+never digitally — rather than trust memory, reserving memorization for
+edge cases like crossing a hostile border, and even then only alongside
+a written backup. But that guidance answers a harder, materially
+different question than shardic’s codeword opt-out, on every relevant
+axis:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>BIP39 seed phrase</th>
+<th>shardic <code>--memorable</code> codeword</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Length</td>
+<td>12, 18, or 24 words (128–256 bits) — already past the range this
+project agrees isn’t realistically memorizable</td>
+<td>8 words (~103 bits) — inside diceware’s own long-established
+memorable range</td>
+</tr>
+<tr>
+<td>Tolerance for error</td>
+<td>Zero — one wrong word typically derives a <em>different, wrong</em>
+wallet silently, often with no error at all</td>
+<td>AES-GCM’s auth tag detects a wrong guess unambiguously; recovery
+reports what matched and stops, nothing derives silently</td>
+</tr>
+<tr>
+<td>Consequence of a mistake</td>
+<td>Total, often-undetected loss of funds</td>
+<td>A failed match — the trustee can retry with a corrected phrase;
+nothing is destroyed or locked out on a wrong attempt</td>
+</tr>
+<tr>
+<td>Who must recall it, and how many</td>
+<td>The single holder, in full</td>
+<td>Any <code>D</code> of <code>T</code> trustees — this specific
+trustee’s phrase doesn’t need to survive alone</td>
+</tr>
+<tr>
+<td>Rehearsal expectation</td>
+<td>Often set once and not touched for years</td>
+<td>A standing trustee role, naturally paired with periodic recall
+practice as an operational habit</td>
+</tr>
+</tbody>
+</table>
+<p>BIP39’s caution is right for the problem it solves. It just doesn’t
+carry over to shardic’s codeword opt-out, which asks for about a third
+of the words, fails safely and interactively instead of silently and
+catastrophically, and only ever needs to be one of several independent
+contributions rather than a single irreplaceable record. Eight real
+words, rehearsed the ordinary way people keep any long-held credential,
+is a realistic target for the trustees this opt-out is meant for.</p>
+</body>
+</html>
