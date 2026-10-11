@@ -1,9 +1,9 @@
 """Deck 3 of the v4.1 set — goal 3: evangelism. Conference talk deck following the
 45-minute speaker outline in docs/conference-talk-pitch.md, with timed speaker notes.
 
-v4.1.1 adds four slides from the white paper — the vault pipeline and zero-leakage
-indexing, shardic-prime, the two kinds of strength, and the bypass-resistance ladder —
-plus a backup slide on codeword strength."""
+v4.1.1 adds slides from the white paper — the vault pipeline and zero-leakage indexing,
+shardic-prime, the two kinds of strength, the Level 2 ceremony, the bypass-resistance
+ladder, and where the guarantee stops — plus four backup slides for Q&A."""
 import sys
 sys.path.insert(0, sys.path[0])
 from deckkit import *
@@ -154,10 +154,10 @@ callout(s, 0.6, 5.1, 12.1, 1.3, "Yes — the codeword is the floor. Default: 8 E
 
 # 13 — implemented vs proposed
 s = d.slide(eyebrow="Implemented vs. proposed", title="Where the line is — stated plainly",
-            notes="[0:24–0:26] Credibility: be explicit. Levels 1 and 2 are running code. Level 3 is a design proposal built on the same unmodified math.")
+            notes="[0:24–0:25] Credibility: be explicit. Levels 1 and 2 are running code. Level 3 is a design proposal built on the same unmodified math.")
 for i, (tag, fill, h, b) in enumerate([
         ("Running code", GREEN, "Level 1 · Personal utility", ["CLI + GUI, no server", "Codewords + one .krypt file", "shardic-prime mandatory trustee"]),
-        ("Running code", GREEN, "Level 2 · Shardic ceremony", ["Public-key-wrapped delivery", "Keycloak-backed trustee selection", "Automatic backfill, single-read drop"]),
+        ("Running code", GREEN, "Level 2 · Shardic ceremony", ["Public-key-wrapped delivery", "Keycloak-backed trustee selection", "Automatic backfill on decline"]),
         ("Design proposal", GOLD, "Level 3 · SPAC", ["Gate any consequential action", "Bound to one Fielded Prime Element", "Human-AI mutual oversight"])]):
     x = 0.6 + i * 4.1
     card(s, x, 1.7, 3.85, 3.6, None, None)
@@ -166,9 +166,23 @@ for i, (tag, fill, h, b) in enumerate([
     text(s, x + 0.3, 2.95, 3.3, 2.2, b, 14, ICE, bullets=True, gap=6)
 callout(s, 0.6, 5.6, 12.1, 0.9, "Each level reuses the one below **unchanged**. Level 3 adds no new cryptography.", 16)
 
-# 14 — data to capability
+# 14 — Level 2 ceremony
+s = d.slide(eyebrow="Level 2  ·  running code", title="The ceremony: identity, custody, and math kept apart",
+            notes="[0:25–0:27] What makes Level 2 more than a CLI. Registration: trustees come from a dedicated Keycloak group and generate their own keypairs on their own devices — the private key never touches a server shardic controls. Formation: an operator with the shardic-operator role picks T trustees plus an ordered backup list; declines and timeouts backfill automatically, race-safe; and the operator can't pick themselves. Delivery: each trustee fetches their own wrapped envelope, addressed by authenticated identity (a single-read drop point is designed but not built yet — say so if asked). Recovery: the combiner only ever receives unsealed shards, never a codeword. The organizing principle: a compromised identity provider or a stalled ceremony can block provisioning, but neither can weaken D-of-T.")
+picture(s, "ceremony-envelope-flow.png", 0.8, 1.8, h=4.6)
+for i, (h, b) in enumerate([("Register", "Trustees generate keypairs on their own devices. Keycloak handles identity — never keys."),
+                            ("Form", "An operator picks T trustees plus ordered backups. Declines backfill automatically; the operator can't pick themselves."),
+                            ("Deliver", "Each trustee fetches their own wrapped envelope, addressed by authenticated identity."),
+                            ("Recover", "The combiner only ever sees unsealed shards — never a codeword.")]):
+    y = 1.7 + i * 1.02
+    badge(s, 6.6, y + 0.02, str(i + 1), 0.48, GOLD, DEEP, 15)
+    text(s, 7.25, y, 5.45, 0.35, h, 15, DEEP, bold=True)
+    text(s, 7.25, y + 0.33, 5.45, 0.65, b, 12.5, MUTED)
+callout(s, 6.6, 5.85, 6.1, 0.85, "A compromised identity provider can stall provisioning — it can't weaken D-of-T.", 13.5)
+
+# 15 — data to capability
 s = d.slide(eyebrow="Where it generalizes", title="From protected file to protected action",
-            notes="[0:26] The plaintext never had to be a file. A SPAC is any enabling value: a signing key, a release-enable code. The Fielded Prime Element reuses shardic-prime's mask so a copied CT SPAC plus a legitimate quorum still fails on the wrong hardware. Precedent: Permissive Action Links, Two-Person Integrity.")
+            notes="[0:27] The plaintext never had to be a file. A SPAC is any enabling value: a signing key, a release-enable code. The Fielded Prime Element reuses shardic-prime's mask so a copied CT SPAC plus a legitimate quorum still fails on the wrong hardware. Precedent: Permissive Action Links, Two-Person Integrity.")
 card(s, 0.6, 1.7, 3.85, 3.5, "PT SPAC → CT SPAC", "Any enabling value — a signing credential, a release-enable code — encrypted and split exactly like a file's key.", ic="lock", body_size=14)
 card(s, 4.7, 1.7, 3.85, 3.5, "Fielded Prime Element", "A hardware-sealed secret takes the prime trustee's slot. Copy the ciphertext elsewhere and a full quorum still fails.", ic="shield", body_size=14)
 card(s, 8.8, 1.7, 3.9, 3.5, "Old idea, new math", "Permissive Action Links and Two-Person Integrity, enforced by the math instead of procedure.", ic="bank", body_size=14)
@@ -176,9 +190,9 @@ code(s, 0.6, 5.45, 12.1, 1.15, [
     "DEK     = reconstruct_secret_with_prime(mask, pool_shards)   # unmodified",
     "CT_SPAC = AES-256-GCM(PT_SPAC, DEK)                          # unmodified"], 14)
 
-# 15 — vignette
+# 16 — vignette
 s = d.slide(eyebrow="One vignette, end to end", title="A high-value treasury wire, start to finish",
-            notes="[0:28] Walk the five stages. Contrast with the as-is: two web-app approvals that one compromised admin or two coerced officers can fake. Here, three of five officers plus the appliance's own hardware plus an on-site key-switch — and the controller's commitment is checked at arming.")
+            notes="[0:29] Walk the five stages. Contrast with the as-is: two web-app approvals that one compromised admin or two coerced officers can fake. Here, three of five officers plus the appliance's own hardware plus an on-site key-switch — and the controller's commitment is checked at arming. Point out why the approver exists: AES-GCM guarantees the CT SPAC decrypts to exactly what went in, but says nothing about whether what went in was the right value. A stale or substituted value would sail through — so an approver independent of whoever wraps it signs a commitment, checked thoroughly at emplacement and quickly at every arming.")
 for i, (h, b) in enumerate([("Approve", "Controller validates the signing key and signs a commitment."),
                             ("Emplace", "Wrap as CT SPAC; split across 5 officers + the HSM appliance."),
                             ("Operate", "Appliance holds only ciphertext — indefinitely."),
@@ -193,24 +207,28 @@ rect(s, 0.6, 5.0, 5.95, 1.2, "F6ECD2", radius=0.06)
 text(s, 0.9, 5.0, 5.4, 1.2, "**As-is:** two clicks in a web app. One hijacked admin can fake both.", 14.5, BROWN, anchor="m")
 rect(s, 6.75, 5.0, 5.95, 1.2, "DFF3E6", radius=0.06)
 text(s, 7.05, 5.0, 5.4, 1.2, "**shardic-SPAC:** three genuine shards, this appliance, this key-switch — or nothing.", 14.5, "1D5B35", anchor="m")
+text(s, 0.6, 6.4, 12.1, 0.4, "Why an independent approver? AES-GCM proves the value decrypts to exactly what went in — not that what went in was right.", 13, MUTED, italic=True)
 
-# 16 — human-AI
+# 17 — human-AI
 s = d.slide(eyebrow="The flagship case", title="Human-AI mutual oversight — one rule, both directions",
             notes="[0:31] The same D-of-T rule, pointed either way by trustee-class assignment. AI-initiated action needs independent human sign-off — no prompt or internal state rebuilds a key that doesn't exist. Human-initiated action needs an independent AI evaluator's attestation against allow-listed criteria — no seniority or urgency talks it out of failing closed.")
 card(s, 0.6, 1.7, 5.95, 3.4, "Humans gate the AI", "An AI proposes a consequential action. It can't execute on its own confidence or speed: below the human threshold, the key **doesn't exist** — no prompt or internal state rebuilds it.", ic="users", body_size=14.5)
 card(s, 6.75, 1.7, 5.95, 3.4, "AI checks the humans", "A coerced or rogue human pushes an action. An independent AI evaluator attests only to allow-listed criteria on authenticated evidence — or **fails closed**.", ic="scales", body_size=14.5)
 callout(s, 0.6, 5.4, 12.1, 1.1, "No model in the cryptographic path. Just trustee slots, assigned by class, composed with an explicit **AND**.", 16)
 
-# 17 — hybrid gates figure
+# 18 — hybrid gates figure
 s = d.slide(eyebrow="How it composes", title="Separate gates, explicit AND",
-            notes="[0:33] A single Shamir split can't express 'all three AI checks AND any two humans.' Use separate gates or a vetted access-structure scheme, combined by an explicit AND, verified server-side. The AI is a bounded evaluator — never an autonomous authority, never able to waive the human threshold.")
+            notes="[0:33] A single Shamir split can't express 'all three AI checks AND any two humans.' Use separate gates or a vetted access-structure scheme, combined by an explicit AND, verified server-side — and treat that composition logic as security-critical: deny by default, and test missing, stale, duplicate, invalid, and wrong-role contributions. The AI is a bounded evaluator — never an autonomous authority, never able to waive the human threshold. Walk the rules box: authenticate and audit what it reads and which policy it ran; its attestation expires; ambiguous or conflicting evidence fails closed; and for irreversible actions it shouldn't be the only thing enabling them.")
 picture(s, "hybrid-ai-human-policy-gates.png", 0.8, 1.75, h=4.95)
-text(s, 7.1, 1.75, 5.6, 3.8, [
+text(s, 7.1, 1.7, 5.6, 2.2, [
     "One D-of-T split treats all shards as **equal peers** — it can't say \"all AI checks **and** any two humans.\"",
-    "So: **separate gates**, combined with an explicit AND, verified server-side.",
-    "The AI gate is a **bounded evaluator**: signed, time-limited, auditable — and it can never waive the human threshold."], 15, MUTED, gap=12)
+    "So: **separate gates**, combined with an explicit AND, verified server-side, deny by default."], 14.5, MUTED, gap=10)
+card(s, 7.1, 3.55, 5.6, 3.15, "An AI trustee is a bounded evaluator", [
+    "Inputs, policy version, identity, attestation key: authenticated and audited",
+    "Its attestation expires; ambiguous evidence **fails closed**",
+    "Never waives the human quorum — and never the **sole** enabler of an irreversible action"], body_size=12.5)
 
-# 18 — bypass ladder
+# 19 — bypass ladder
 s = d.slide(eyebrow="Cryptographic vs. topological bypass", title="Can the ceremony simply be skipped?",
             subtitle="The math guarantees fewer than D shards never rebuild the key. It can't guarantee the system ever calls the ceremony.",
             notes="[0:35] The most important idea after the math itself. Below-threshold recovery is a cryptographic guarantee. Whether the system ever invokes the ceremony is a topological property of the surrounding design — a second code path, a config flag, or a maintenance mode can reach the end state without it. Four patterns bind the ceremony into the execution path, weakest to strongest. The software patterns reduce risk, but a privileged insider who can edit that code can route around them. Only the hardware-anchored patterns reach the same bar as the math, because bypassing them means breaking the hardware boundary or physically defeating a circuit. Real deployments layer several; the composite is only as strong as its weakest layer.")
@@ -229,7 +247,7 @@ text(s, 0.9, 5.7, 5.4, 0.95, "**Software-enforced:** reduces risk — but whoeve
 rect(s, 6.75, 5.7, 5.95, 0.95, "DFF3E6", radius=0.06)
 text(s, 7.05, 5.7, 5.4, 0.95, "**Hardware-anchored:** bypass means breaking the hardware boundary. Proof grade.", 13.5, "1D5B35", anchor="m")
 
-# 19 — NEAT
+# 20 — NEAT
 s = d.slide(eyebrow="Beyond the math", title="NEAT: what a critical deployment still needs",
             notes="[0:37] NEAT names what the previous slide implies. It extends the classic reference-monitor requirements (tamperproof, always invoked, small enough to verify). It's a deployment framework, not a cryptographic one — meeting it doesn't make the math stronger, it makes the system around the math trustworthy.")
 for i, (L, h, b) in enumerate([("N", "Non-bypassable", "The ceremony is the only path to the end state."),
@@ -243,9 +261,9 @@ for i, (L, h, b) in enumerate([("N", "Non-bypassable", "The ceremony is the only
     text(s, x + 0.3, 3.45, 2.3, 1.6, b, 14, ICE)
 callout(s, 0.6, 5.5, 12.1, 1.0, "A **deployment** bar, not a cryptographic one: it doesn't make the math stronger — it makes the system around the math trustworthy.", 15)
 
-# 20 — where it doesn't fit
+# 21 — where it doesn't fit
 s = d.slide(eyebrow="Credibility over hype", title="Where shardic doesn't fit",
-            notes="[0:39–0:43] Say this out loud. Frequent or live authorization, per-trustee revocation, online quorum and key rotation: use FROST or HSM-backed multisig. shardic is for rare, high-stakes, deliberate recovery.")
+            notes="[0:39–0:41] Say this out loud. Frequent or live authorization, per-trustee revocation, online quorum and key rotation: use FROST or HSM-backed multisig. shardic is for rare, high-stakes, deliberate recovery.")
 for i, (ic, h, b) in enumerate([("userclock", "Frequent or live authorization", "Built for rare break-glass events, not every request."),
                                 ("users", "Revoking one trustee", "It's split-once: changing trustees means a full re-split."),
                                 ("key", "Online quorum & key rotation", "Use threshold signatures (FROST) or HSM-backed multisig."),
@@ -257,7 +275,21 @@ for i, (ic, h, b) in enumerate([("userclock", "Frequent or live authorization", 
     text(s, x + 1.25, y + 0.92, 4.4, 1.0, b, 14, "E8DCC0")
 text(s, 0.6, 6.35, 12.1, 0.4, "Rare, high-stakes, offline, small trustee set, shareable vault file — that's the sweet spot.", 14, MUTED, italic=True)
 
-# 21 — takeaways
+# 22 — where the guarantee stops
+s = d.slide(eyebrow="Credibility over hype  ·  2", title="What the math doesn't do on its own",
+            notes="[0:41–0:43] The second half of the credibility section: each of these is a boundary the deployment has to own, not a flaw in the threshold guarantee. SPAC's open parameters are integration decisions, not open cryptographic questions. AI-trustee data feeds need multi-source authentication designed per deployment. The creator's deletion is an operational assumption the cryptography can't enforce. Reconstruction records contributions; it doesn't prove who or why. And the one-file design trades availability risk for simplicity — back it up durably.")
+for i, (ic, b) in enumerate([
+        ("puzzle", "Practical SPAC design parameters (hardware target, grant wire format) will be driven by target operational and security constraints."),
+        ("scales", "How AI trustees get trustworthy, authenticated input data is implementation specific."),
+        ("warn", "The guarantee requires the creator deleted the plaintext and all copies."),
+        ("usershield", "Reconstruction is a functional protection. Identity or intent, or non-repudiation, if needed, need to integrate other mechanisms."),
+        ("db", "The single .krypt file is a conscious availability risk tradeoff, though not an access risk.")]):
+    y = 1.6 + i * 1.02
+    rect(s, 0.6, y, 12.1, 0.86, LIGHT, radius=0.08)
+    icon(s, 0.85, y + 0.15, ic, 0.56)
+    text(s, 1.7, y, 10.7, 0.86, b, 16, DEEP, anchor="m")
+
+# 23 — takeaways
 s = d.slide(eyebrow="Take these home", title="Three things to remember",
             notes="Mirror the CFP 'attendees will learn' list.")
 for i, (h, b) in enumerate([
@@ -269,7 +301,7 @@ for i, (h, b) in enumerate([
     text(s, 1.7, y + 0.02, 11, 0.5, h, 22, DEEP, bold=True)
     text(s, 1.7, y + 0.6, 11, 0.8, b, 16, MUTED)
 
-# 22 — close
+# 24 — close
 s = d.slide(dark=True, notes="[0:43–0:45] Repo link, README use-case catalog, and how to reach the project for integration conversations. Then Q&A.")
 text(s, 0.9, 1.1, 11.5, 0.4, "THANK YOU", 12, GOLD, bold=True, spacing=120)
 text(s, 0.9, 1.7, 11.5, 1.6, "Math beats policies and permissions.", 46, WHITE, bold=True)
@@ -283,7 +315,7 @@ for i, (ic, h, b) in enumerate([("puzzle", "Run it", ["github.com/splashd1/", "s
     text(s, x + 1.1, 4.4, 2.4, 0.9, b, 13, ICE, gap=0)
 text(s, 0.9, 6.0, 11.5, 0.5, "Questions?", 22, SOFT, italic=True)
 
-# 23 — backup: codeword strength
+# 25 — backup: codeword strength
 s = d.slide(eyebrow="Backup  ·  if asked about codeword strength", title="Is ~2^100 enough when the DEK is 2^256?",
             notes="Backup for slide 12. The 256-bit comparison measures the wrong thing: the DEK layer faces an unbounded, global keyspace search with nothing else in the way; a codeword faces someone holding one stolen record, searching a bounded, memory-hard space, and success yields one D-of-T point — worthless below threshold. Even at a deliberately impossible 10^12 Argon2id guesses per second, exhausting 2^100 takes ~1.3×10^18 seconds — tens of billions of years — and that guess rate implies ~250 exabytes per second of memory bandwidth. More words or higher Argon2id cost is still worthwhile headroom, not a fix.")
 for i, (big, small) in enumerate([("~103 bits", "8 words from the EFF long wordlist, ~12.9 bits each."),
@@ -294,5 +326,53 @@ for i, (big, small) in enumerate([("~103 bits", "8 words from the EFF long wordl
 card(s, 6.4, 1.7, 6.3, 2.1, "DEK / AES-256-GCM layer", "Attacker holds only ciphertext. Full, unstructured 256-bit keyspace, nothing else in the way — so it must be unconditionally strong.", body_size=13.5)
 card(s, 6.4, 4.0, 6.3, 2.1, "Codeword layer", "Attacker holds one stolen shard record. Bounded, memory-hard search — and success buys one D-of-T point, worthless below threshold.", fill=BROWN, body_size=13.5)
 text(s, 6.4, 6.3, 6.3, 0.5, "10^12 guesses/s × 256 MiB ≈ 250 EB/s of memory bandwidth — not a plausible attacker.", 12.5, MUTED, italic=True)
+
+# 26 — backup: memorability
+s = d.slide(eyebrow="Backup  ·  if asked whether people can remember eight words", title="Can a trustee really hold eight words?",
+            notes="Backup for slide 12. The task is long-term retention through rehearsal, not one-shot recall — Miller's 'seven plus or minus two' is about working memory and doesn't describe a standing trustee. Diceware recommends six words as standard and ten for 10+ year use; eight sits inside that range, and real words become a mental sentence. BIP39's 'write it down' advice answers a harder question: three times the words, zero error tolerance, silent catastrophic failure, and one holder who must recall it alone.")
+text(s, 0.6, 1.7, 4.9, 4.6, [
+    "**Rehearsed, not recited once.** Like a PIN or alarm code — not Miller's 7 ± 2, which is about working memory.",
+    "**Inside Diceware's range.** Six words standard, ten for 10+ year use.",
+    "**Real words carry meaning.** Eight become one short mental sentence."], 15, MUTED, gap=14)
+cols = [(5.9, 2.0, ""), (7.9, 2.4, "BIP39 seed phrase"), (10.3, 2.4, "shardic codeword")]
+rows = [("Length", "12–24 words", "8 words (~103 bits)"),
+        ("Wrong word", "Silently derives a different wallet", "Auth tag rejects it; retry"),
+        ("Cost of a mistake", "Total, often undetected loss", "A failed match, nothing lost"),
+        ("Who must recall", "One holder, alone", "Any D of T trustees")]
+rect(s, 5.9, 1.7, 6.8, 0.55, DEEP, radius=0.04)
+for x, w, h in cols[1:]:
+    text(s, x + 0.15, 1.7, w - 0.3, 0.55, h, 13.5, WHITE, bold=True, anchor="m")
+for r, (a, b, c) in enumerate(rows):
+    y = 2.35 + r * 0.95
+    rect(s, 5.9, y, 6.8, 0.85, LIGHT, radius=0.04)
+    for (x, w, _), v, col, bold in zip(cols, (a, b, c), (DEEP, BROWN, "1D5B35"), (True, False, False)):
+        text(s, x + 0.15, y, w - 0.3, 0.85, v, 13, col, bold=bold, anchor="m")
+text(s, 5.9, 6.25, 6.8, 0.5, "BIP39's caution is right for its problem. It doesn't carry over to this one.", 13, MUTED, italic=True)
+
+# 27 — backup: use cases
+s = d.slide(eyebrow="Backup  ·  where it applies", title="Rare, high-stakes, no lone actor",
+            notes="Backup, for 'who would actually use this?' Every case shares the shape: policy or regulation already says no single party should decrypt this alone, and access is rare and deliberate rather than routine. Full catalog in the white paper's use-case section and the README.")
+for i, (ic, h, b) in enumerate([
+        ("warn", "Break-glass infrastructure", "Root CA key, database master key, SCADA override — T = 7, D = 4."),
+        ("tree", "Estate & succession", "A password manager's master vault split among family, lawyer, partner — T = 5, D = 3."),
+        ("bank", "Government", "Generalized two-person rule, continuity-of-government credentials, election tabulation keys."),
+        ("case", "Escrow & disputes", "M&A documents released only by a quorum of board, counsel, and escrow agent."),
+        ("key", "Treasury cold storage", "Root key material behind a multisig wallet — no single executive moves funds."),
+        ("scales", "Separation of duties", "SOX, HIPAA \"minimum necessary\" — enforced by the math, not just policy.")]):
+    x, y = 0.6 + (i % 3) * 4.1, 1.65 + (i // 3) * 2.45
+    card(s, x, y, 3.85, 2.25, None, None)
+    icon(s, x + 0.3, y + 0.3, ic, 0.56)
+    text(s, x + 1.05, y + 0.38, 2.6, 0.45, h, 15.5, WHITE, bold=True)
+    text(s, x + 0.3, y + 1.05, 3.25, 1.1, b, 13, ICE)
+
+# 28 — backup: RTO
+s = d.slide(eyebrow="Backup  ·  if asked how fast a ceremony can run", title="Latency is a CONOPS choice, not a fixed cost",
+            notes="Backup for the SPAC section. Target recovery time is a per-deployment parameter. Pre-forming the ceremony is the biggest lever — it moves select/invite/accept out of the clock entirely. Network delivery is near-instant; physical carriage is minutes to days, so air-gap independence and a tight recovery time largely exclude each other. A single operator and custodian are fast, but an unreachable one is a single point of availability failure — on-call backups fix that without adding authorizers. None of this reduces how many parties the cryptography requires.")
+for i, (ic, h, b) in enumerate([
+        ("users", "Convening the quorum", "Pre-form the ceremony before it's needed: hours of select-invite-accept become seconds to minutes. The biggest lever."),
+        ("mail", "Shard delivery", "Network: near-instant. Physical carriage: minutes to days. Air-gap independence and a tight recovery time rarely coexist."),
+        ("userclock", "Endgame unlock", "One operator, one custodian — fast. On-call backups protect availability without adding authorizers.")]):
+    card(s, 0.6 + i * 4.1, 1.7, 3.85, 3.6, h, b, ic=ic, body_size=14)
+callout(s, 0.6, 5.6, 12.1, 0.95, "Speed comes from pre-positioning inputs you already need — **never** from needing fewer of them.", 15)
 
 d.save(sys.argv[1])
