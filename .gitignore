@@ -9,3 +9,7 @@ demo/media/*.gif
 demo/media/dashboard-recording/
 demo/media/dashboard-timeline.json
 demo/media/acts/
+
+# Unrelated local Ollama assistant experiment (not part of shardic)
+/assistant.py
+/webapp.py
