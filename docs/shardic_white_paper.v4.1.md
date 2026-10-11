@@ -20,7 +20,18 @@ We apply that one primitive at three cumulative levels, each reusing the level b
 - **Level 2 — shardic ceremony for system security integration.** The same primitive, wrapped in public-key delivery and a repeatable, identity-backed process for registering, selecting, and provisioning trustees. It suits an organization's standing trustee pool rather than a one-off personal setup. Like Level 1, it runs today as a demonstration combiner service.
 - **Level 3 — SPAC for product protection.** The protected value stops being "a file's plaintext" and becomes any enabling code for a consequential action — arming a capability, releasing funds, clearing a safety interlock — bound to one fielded product through a hardware-bound Fielded Prime Element. Level 3 is a design proposal built entirely on the unmodified math of Levels 1 and 2. It's also home to a timely extension: putting human and AI trustees under one explicit threshold rule, so neither an AI-initiated action nor a rogue or coerced human one can proceed without the other side's independent agreement.
 
-Here's the road ahead. We start by laying the three levels side by side so you can pick the depth that fits your interest. Then we walk Level 1's operations and mechanics in full, follow with Level 2's ceremony, and finish the build-up with Level 3's SPAC ecosystem: the Fielded Prime Element, shardware-token hardware variants, and non-bypassable invocation. A security discussion spanning all three levels comes next, closing with NEAT, a design framework we name for critical SPAC deployments. Four scenarios then walk a full ceremony lifecycle — two product-protection cases, one network-path case, and one hybrid human-AI policy gate — before a closing summary of what the design offers and where it deliberately doesn't fit. Two appendices round things out: a standalone primer on Shamir's Secret Sharing, and the full story on codeword modes, tuning, and field deployment.
+This paper lays out:
+
+- The value of a sharded, multi-entity, encryption approach
+- Employment levels.
+  - Discussion of Level 1's operations and mechanics in full, followed with
+  - Level 2's ceremony—the shardic encryption and recovery lifecycle
+  - Level 3's SPAC ecosystem: the Fielded Prime Element, shardware-token hardware variants, and non-bypassable invocation.
+  - Security discussion spanning all three levels comes next,
+    - NEAT, a design framework we name for critical SPAC deployments.
+    - Four scenarios then walk a full ceremony lifecycle — two product-protection cases, one network-path case, and one hybrid human-AI policy gate.
+  - Summary of what the design offers and where it deliberately doesn't fit.
+  - Two appendices round things out: a standalone primer on Shamir's Secret Sharing, and the full story on codeword modes, tuning, and field deployment.
 
 ---
 
