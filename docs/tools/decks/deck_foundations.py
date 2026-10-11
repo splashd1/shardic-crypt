@@ -4,14 +4,14 @@ import sys
 sys.path.insert(0, sys.path[0])
 from deckkit import *
 
-d = Deck("Cryptographic Foundations  ·  v4.1")
+d = Deck("Cryptographic Foundations  ·  v4.1.1")
 
 # 1 — title
 s = d.slide(dark=True, notes="This deck is for people who may never run the CLI: architects and teams deciding whether shardic's primitive belongs in their own multi-party security design.")
 text(s, 0.9, 1.2, 10, 0.4, "PUBLIC EDUCATION  ·  WHITE PAPER V4.1 COMPANION", 12, GOLD, bold=True, spacing=120)
 text(s, 0.9, 1.9, 11.5, 1.6, "The Cryptographic Foundation of Shardic", 48, WHITE, bold=True)
 text(s, 0.9, 3.55, 10.5, 1.0, "How threshold secret sharing turns \"no one acts alone\" into math — and how to build on it.", 22, ICE)
-text(s, 0.9, 6.3, 10, 0.4, "Open for evaluation and integration  ·  github.com/splashd1/shardic  ·  September 2026", 12, SOFT)
+text(s, 0.9, 6.3, 10, 0.4, "Open for evaluation and integration  ·  github.com/splashd1/shardic-crypt  ·  September 2026", 12, SOFT)
 
 # 2 — why share this
 s = d.slide(eyebrow="Why we're sharing this", title="A building block, not just a tool",
@@ -165,6 +165,6 @@ for i, (ic, h, b) in enumerate([
     icon(s, x + 0.3, 3.05, ic, 0.56, BLUE)
     text(s, x + 0.3, 3.8, 2.2, 0.45, h, 15.5, WHITE, bold=True)
     text(s, x + 0.3, 4.3, 2.2, 0.9, b, 12, ICE)
-text(s, 0.9, 5.9, 11.5, 0.5, "Evaluate it, break it, build on it — github.com/splashd1/shardic", 17, SOFT, italic=True)
+text(s, 0.9, 5.9, 11.5, 0.5, "Evaluate it, break it, build on it — github.com/splashd1/shardic-crypt", 17, SOFT, italic=True)
 
 d.save(sys.argv[1])

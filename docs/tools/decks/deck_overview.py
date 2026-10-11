@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, sys.path[0])
 from deckkit import *
 
-d = Deck("Overview & Demo  ·  v4.1")
+d = Deck("Overview & Demo  ·  v4.1.1")
 
 # 1 — title
 s = d.slide(dark=True, notes="Opening. One line: shardic makes 'no single party can decrypt this alone' a mathematical fact, not a policy promise.")
@@ -13,7 +13,7 @@ text(s, 0.9, 3.25, 11, 0.7, "No single party can decrypt it alone. Any D of T ca
 text(s, 0.9, 4.1, 9.5, 1.0, "Threshold-recoverable encryption you can run today — a working CLI and GUI, no server, no network.", 17, SOFT)
 for i, n in enumerate(["lock", "users", "key"]):
     icon(s, 0.9 + i * 0.85, 5.6, n, 0.62, NAVY)
-text(s, 0.9, 6.55, 8, 0.3, "github.com/splashd1/shardic  ·  September 2026", 12, SOFT)
+text(s, 0.9, 6.55, 8, 0.3, "github.com/splashd1/shardic-crypt  ·  September 2026", 12, SOFT)
 
 # 2 — the problem
 s = d.slide(eyebrow="The status quo", title="One key, one point of failure",
@@ -159,7 +159,7 @@ s = d.slide(dark=True, notes="Close: clone, run the two commands, read the white
 text(s, 0.9, 0.9, 10, 0.4, "TRY IT IN FIVE MINUTES", 12, GOLD, bold=True, spacing=120)
 text(s, 0.9, 1.4, 11.5, 1.0, "Math beats policies and permissions.", 40, WHITE, bold=True)
 code(s, 0.9, 2.7, 7.0, 2.2, [
-    "$ git clone github.com/splashd1/shardic",
+    "$ git clone https://github.com/splashd1/shardic-crypt",
     "$ pip install cryptography argon2-cffi",
     "$ python3 vault_create.py --input <dir> \\",
     "      --trustees 5 --threshold 3 --outdir v",

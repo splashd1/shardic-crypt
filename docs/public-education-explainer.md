@@ -137,7 +137,7 @@ custody as the only way encryption works.
   `docs/shardic_white_paper.v4.1.md`.
 - **Want the conference-length version of this pitch?**
   `docs/conference-talk-pitch.md`.
-- **Want it as slides?** `docs/shardic_deck_v4_1_foundations.pptx`
+- **Want it as slides?** `docs/shardic_deck_v4_1_1_foundations.pptx`
   walks the same cryptographic foundation step by step, and
-  `docs/shardic_deck_v4_1_overview.pptx` is the short version with a
+  `docs/shardic_deck_v4_1_1_overview.pptx` is the short version with a
   live demo.

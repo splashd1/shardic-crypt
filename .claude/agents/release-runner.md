@@ -67,7 +67,7 @@ quota issue with a manually-created release per explicit instruction
 from the calling context):
 
 ```sh
-gh release view vX.Y.Z --repo splashd1/shardic
+gh release view vX.Y.Z --repo splashd1/shardic-crypt
 ```
 
 Confirm:
@@ -80,7 +80,7 @@ Confirm:
 - If any asset is missing (most likely: Windows `.exe`s, since that
   build path has needed a backfill before), report exactly which ones
   and the exact command to finish the job later (`gh workflow run
-  build.yml --ref vX.Y.Z --repo splashd1/shardic` or `gh run rerun
+  build.yml --ref vX.Y.Z --repo splashd1/shardic-crypt` or `gh run rerun
   <run-id>`) rather than leaving it as a vague "something's missing."
 
 ## Reporting

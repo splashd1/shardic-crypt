@@ -1,19 +1,26 @@
-# Session notes — 2026-10-11 (Claude Code: fixed repo ownership, reviewed and git-ignored the stray `assistant.py` / `webapp.py`)
+# Session notes — 2026-10-11 (Claude Code: repo ownership fix, stray files git-ignored, v4.1 paper synced to the user's docx edit + one numeric fix, conference talk deck expanded to v4.1.1, repo links moved to `shardic-crypt`)
 
 ## What happened
 
 - **Repo ownership:** `/imgs/git/shardic-crypt` was owned by `root`, so every git command (and therefore the sync skill and SessionStart pull) failed with "detected dubious ownership". The user `chown`ed it to `splashd`; no `safe.directory` exception was added.
-- **`assistant.py` / `webapp.py` reviewed:** both are an unrelated local Ollama coding-assistant experiment (LangChain `ChatOllama` REPL + a Streamlit front end), not part of shardic, and nothing in the repo references them. Both are also broken: `webapp.py` imports a non-existent `agent` from `assistant.py`; `assistant.py`'s `write` command can never get content from single-line `input()`, and `max_new_tokens` isn't a `ChatOllama` parameter.
-- **Added root-anchored `/assistant.py` and `/webapp.py` to `.gitignore`** at the user's request, so they stop showing as untracked. The files stay on disk, untouched.
+- **`assistant.py` / `webapp.py`:** an unrelated, broken local Ollama coding-assistant experiment (LangChain REPL + Streamlit front end), not part of shardic. Git-ignored at the user's request (root-anchored `/assistant.py`, `/webapp.py`); files left on disk. Also ignored LibreOffice lock files (`.~lock.*#`).
+- **White paper v4.1 synced to the user's LibreOffice edit of the docx** (`ec7cc22`): the only real change was the abstract's "road ahead" paragraph becoming a nested "This paper lays out:" bullet list; copied verbatim into the md, and only that block swapped into the html (this machine's pandoc 3.1.3 would otherwise churn CSS/table markup across the whole file). Other docx-vs-docx diffs were LibreOffice re-save artifacts (identical media, same rendered list numbering).
+- **Paper numeric fix (appendix B.4):** "roughly 30 billion years" → "roughly 40 billion years to search the whole space, or about 20 billion on average" (2^100 / 10^12 per s ≈ 1.27×10^18 s). Patched md, html, and the docx's `document.xml` directly (no pandoc regen, to keep the user's formatting). The archived-in-place v4.0 trio still has the old figure, deliberately untouched.
+- **Conference talk deck v4.1.1** (`docs/shardic_deck_v4_1_1_conference_talk.pptx`, 22 slides + 1 backup), from a paper-vs-deck gap review. New: vault pipeline + zero-leakage indexing (10), shardic-prime mask (11), "is the real security just the codewords?" two-kinds-of-strength (12), cryptographic-vs-topological bypass ladder before NEAT (18), backup slide on ~2^100 codeword strength (23). Speaker notes retimed; `conference-talk-pitch.md` timing table, 25-min guidance, and materials list updated to match. Title slide: "John Davis · Venue and date TBD". New slide copy checked against the nomenclature skill (fixed a misuse of "unsealed shards").
+- **Whole deck set is now v4.1.1**: overview and foundations rebuilt as `shardic_deck_v4_1_1_{overview,foundations}.pptx` (link changes only + footer label). The v4.1 decks are restored to their committed state and kept as the superseded set (user asked for new filenames to avoid overwrite conflicts with open LibreOffice windows). `build.sh` now writes the v4_1_1 names.
+- **Repo links → `github.com/splashd1/shardic-crypt`**: all three deck scripts (overview's `git clone` also gained `https://`), `shardic_deck_v3_2.pptx` (direct XML text swap), `.claude/agents/release-runner.md`'s `gh --repo` commands, README / pitch / public-education-explainer deck references. `docs/archive/*` and old notes entries deliberately left as historical. `splashd1/shardic` (the original repo) still exists on GitHub.
 
 ## State at end
 
-Working tree clean; `.gitignore` change + this note committed and pushed.
+Everything committed and pushed.
 
 ## Possibly worth following up
 
-- **Security, still open:** the `origin` remote URL still has a GitHub PAT embedded (checked this session without printing it). Revoke it and switch to a credential helper or SSH.
-- The prior entry's other follow-ups (talk-deck placeholders, archiving the v3.2 deck and v4.0 trio) are still unaddressed.
+- **Security, still open:** the `origin` remote URL still has a GitHub PAT embedded (checked without printing it). Revoke it and switch to a credential helper or SSH.
+- Paper-vs-deck gap review items not built yet (items 5+): widen "Where shardic doesn't fit" (SPAC still a design, AI-trustee data-feed integrity open, creator-deletion assumption, no non-repudiation, single-file availability risk); a Level 2 ceremony slide (`ceremony-envelope-flow.png`); the Approver commitment on the treasury slide; AI-trustee rules from §7.3; Q&A backups (use-case grid, BIP39 memorability, RTO trade-offs).
+- Pitch doc's speaker-bio template still says `[Name]`; venue/date TBD on the title slide.
+- The user's roadmap bullets keep two dangling fragments ("…followed with", "…comes next,") — user's call.
+- Archiving the v3.2 deck and the v4.0 trio is still unaddressed.
 
 ---
 

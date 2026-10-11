@@ -70,7 +70,7 @@ a niche cryptographic curiosity.
   encryption and basic key management, not with Shamir's Secret
   Sharing specifically (the talk builds it from scratch).
 - **Format:** works at 25 min (demo + core mechanism only, drop the
-  SPAC/human-AI section to a mention), 45 min (full outline below), or
+  SPAC/human-AI and bypass-ladder/NEAT sections to a mention), 45 min (full outline below), or
   60 min (add live audience Q&A on threshold-signature alternatives —
   FROST, HSM multisig — and where shardic fits/doesn't).
 - **Also fits:** a workshop/tutorial slot (hands-on: attendees run
@@ -97,10 +97,12 @@ a niche cryptographic curiosity.
 |---|---|
 | 0:00–0:04 | **Hook.** The single-point-of-control problem, framed via a real incident class (insider risk / one-compromised-credential breach), not abstractly. |
 | 0:04–0:10 | **Live demo.** Create a vault with `T=5`, `D=3`; show the `.krypt` file; recover with 3 of 5 codewords; show recovery *fails* with 2. Real terminal, not slides. |
-| 0:10–0:22 | **The mechanism, built from first principles.** Geometric intuition (points determine a polynomial) → the precise construction (`f(x) = S + a₁x + ... `) → why fewer than D points leave the secret fully undetermined, not just hard to guess → GF(256) in one slide (why bytes, why this field, briefly). Mirrors `docs/sss_explained_for_shardic.md`. |
-| 0:22–0:28 | **What's actually implemented vs. proposed**, stated plainly (this project is explicit about that line): Level 1 (base scheme, shardic-prime) and Level 2 (shardic-envelope, ceremony formation) are running code; Level 3 — SPAC, hardware-bound Fielded Prime Elements, and the human-AI oversight construction — is a design proposal built on the same unmodified math. |
-| 0:28–0:38 | **Where this generalizes: SPAC and human-AI mutual oversight.** The reframe from "protected file" to "protected action." Walk one vignette end-to-end (a treasury disbursement or safety-interlock release) then the flagship case: an AI-initiated action requiring independent human sign-off, and — symmetrically — a human-initiated action requiring independent AI validation, as the *same* D-of-T rule pointed in either direction by trustee-class assignment. |
-| 0:38–0:43 | **Where it doesn't fit** (credibility matters more than hype): not for frequent/live authorization, not a substitute for threshold-signature schemes like FROST or HSM-backed multisig when you need key rotation and online quorum. |
+| 0:10–0:18 | **The mechanism, built from first principles.** Geometric intuition (points determine a polynomial) → the precise construction (`f(x) = S + a₁x + ... `) → why fewer than D points leave the secret fully undetermined, not just hard to guess → GF(256) in one slide (why bytes, why this field, briefly). Mirrors `docs/sss_explained_for_shardic.md`. |
+| 0:18–0:24 | **From math to a working vault.** Split only the DEK, seal every shard under its own trustee key (a raw shard is just data), ship one `.krypt` file with no trustee map — recovery trial-matches, and GCM's auth tag confirms the pairing. Then shardic-prime's one-time-pad mask (a mathematically mandatory trustee, and the seed of the Fielded Prime Element), and the honest answer to "so is the real security just the codewords?": the key split is unconditional, each codeword is computational, more trustees don't fix a weak one, and shardic envelope reaches parity with the DEK. Codeword-strength numbers live on a backup slide. |
+| 0:24–0:26 | **What's actually implemented vs. proposed**, stated plainly (this project is explicit about that line): Level 1 (base scheme, shardic-prime) and Level 2 (shardic-envelope, ceremony formation) are running code; Level 3 — SPAC, hardware-bound Fielded Prime Elements, and the human-AI oversight construction — is a design proposal built on the same unmodified math. |
+| 0:26–0:35 | **Where this generalizes: SPAC and human-AI mutual oversight.** The reframe from "protected file" to "protected action." Walk one vignette end-to-end (a treasury disbursement or safety-interlock release) then the flagship case: an AI-initiated action requiring independent human sign-off, and — symmetrically — a human-initiated action requiring independent AI validation, as the *same* D-of-T rule pointed in either direction by trustee-class assignment. |
+| 0:35–0:39 | **Can the ceremony be skipped?** The cryptographic bypass surface (closed by the math) vs. the topological one (another code path that never calls the ceremony). The four invocation patterns from weakest to strongest — capability binding, constrained state machine, secure-element-internal sequencing, physical interlock — and why only the hardware-anchored two reach proof grade. Then NEAT as the deployment bar. |
+| 0:39–0:43 | **Where it doesn't fit** (credibility matters more than hype): not for frequent/live authorization, not a substitute for threshold-signature schemes like FROST or HSM-backed multisig when you need key rotation and online quorum. |
 | 0:43–0:45 | **Close + call to action.** Repo link, README's use-case catalog, how to reach the project for integration conversations. |
 
 ## Suggested venues (adjust per current CFP calendar)
@@ -116,8 +118,8 @@ Security-generalist and applied-crypto tracks are the best fit; AI-governance-ad
 
 - This repo + README (working code, install-and-run).
 - `docs/shardic_white_paper.v4.1.md` / `.html` / `.docx` — full paper for attendees who want the complete argument across all three levels of implementation.
-- `docs/shardic_deck_v4_1_conference_talk.pptx` — the talk deck for this outline (18 slides, timed speaker notes keyed to the 45-minute segments above); fill in the speaker/venue placeholder on the title slide. For a 25-minute slot, drop the SPAC/human-AI slides to a single mention.
-- `docs/shardic_deck_v4_1_overview.pptx` and `docs/shardic_deck_v4_1_foundations.pptx` — shorter demo and deeper cryptography decks, useful as backup slides or leave-behinds.
+- `docs/shardic_deck_v4_1_1_conference_talk.pptx` — the talk deck for this outline (v4.1.1: 22 slides plus one backup slide on codeword strength, timed speaker notes keyed to the 45-minute segments above); the title slide names John Davis as speaker; fill in the venue and date (currently TBD) once a CFP is accepted. For a 25-minute slot, drop the SPAC/human-AI slides and the bypass-ladder/NEAT slides to a single mention. The earlier v4.1 decks (including the 18-slide `docs/shardic_deck_v4_1_conference_talk.pptx`) are superseded.
+- `docs/shardic_deck_v4_1_1_overview.pptx` and `docs/shardic_deck_v4_1_1_foundations.pptx` — shorter demo and deeper cryptography decks, useful as backup slides or leave-behinds.
 - `docs/sss_explained_for_shardic.md` — the standalone SSS build-up this talk's middle section mirrors.
 - `docs/public-education-explainer.md` — the non-technical version, useful as a leave-behind/blog cross-post for attendees who want to send it to a non-cryptographer colleague.
 

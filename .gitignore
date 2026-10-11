@@ -13,3 +13,6 @@ demo/media/acts/
 # Unrelated local Ollama assistant experiment (not part of shardic)
 /assistant.py
 /webapp.py
+
+# LibreOffice lock files (present while a doc/deck is open)
+.~lock.*#
