@@ -115,10 +115,10 @@ for i, (big, small) in enumerate([("1 byte", "= one field element. Exact arithme
 
 # 10 — from math to a vault
 s = d.slide(eyebrow="From math to a working vault", title="Split the key, seal every shard, ship one file",
-            notes="[0:18] SSS never touches the bulk data — AES-256-GCM encrypts the archive once; Shamir splits only the 32-byte DEK. Then the step people skip: a raw Shamir point is just data, so D of them stored in the clear would rebuild the key with nobody's cooperation. Each shard is sealed under its own shardic encryption key — a codeword through Argon2id today, or a full-strength key by envelope. Finally, the .krypt file carries no trustee map: records are opaque and shuffled, and recovery tries every codeword against every record — the GCM auth tag confirms the match. With T in the tens that's instant, and the file reveals nothing about who holds what. This is what takeaway 2 means.")
+            notes="[0:18] SSS never touches the bulk data — AES-256-GCM encrypts the archive once; Shamir splits only the 32-byte DEK — and it does it byte by byte: 32 independent polynomials, so each shard is one x-coordinate with 32 y-values, one point per key byte. Any D shards give D points on every one of the 32 curves, and the DEK comes back a byte at a time. Then the step people skip: a raw shard is just data, so D of them stored in the clear would rebuild the key with nobody's cooperation. Each shard is sealed under its own shardic encryption key — a codeword through Argon2id today, or a full-strength key by envelope. Finally, the .krypt file carries no trustee map: records are opaque and shuffled, and recovery tries every codeword against every record — the GCM auth tag confirms the match. With T in the tens that's instant, and the file reveals nothing about who holds what. This is what takeaway 2 means.")
 for i, (h, b) in enumerate([("Archive", "Pack the input into one uncompressed tar."),
                             ("Encrypt once", "AES-256-GCM under a random 256-bit DEK."),
-                            ("Split the key", "Shamir splits only the 32-byte DEK into T shards."),
+                            ("Split the key", "One split per DEK byte: each of T shards holds 32 points. Any D rebuild all 32 bytes."),
                             ("Seal each shard", "Under its own shardic encryption key, e.g. codeword → Argon2id."),
                             ("One .krypt", "Header, metadata, ciphertext. Safe to share.")]):
     x = 0.6 + i * 2.47
@@ -127,7 +127,7 @@ for i, (h, b) in enumerate([("Archive", "Pack the input into one uncompressed ta
     text(s, x + 0.22, 2.6, 1.85, 0.4, h, 17, WHITE, bold=True)
     text(s, x + 0.22, 3.08, 1.85, 1.2, b, 13, ICE)
 rect(s, 0.6, 4.65, 5.95, 1.95, "F6ECD2", radius=0.06)
-text(s, 0.9, 4.65, 5.4, 1.95, ["**A raw shard is just data.**", "D raw Shamir points stored in the clear would rebuild the key with nobody's cooperation — so every shard is sealed before it's stored."], 14.5, BROWN, anchor="m", gap=6)
+text(s, 0.9, 4.65, 5.4, 1.95, ["**A raw shard is just data.**", "D raw shards stored in the clear would rebuild the key with nobody's cooperation — so every shard is sealed before it's stored."], 14.5, BROWN, anchor="m", gap=6)
 rect(s, 6.75, 4.65, 5.95, 1.95, "DFF3E6", radius=0.06)
 text(s, 7.05, 4.65, 5.4, 1.95, ["**No map inside the file.**", "Records are opaque and shuffled. Recovery tries each codeword against every record; GCM's auth tag confirms the match."], 14.5, "1D5B35", anchor="m", gap=6)
 
