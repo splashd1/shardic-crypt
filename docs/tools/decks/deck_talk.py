@@ -158,7 +158,7 @@ s = d.slide(eyebrow="Implemented vs. proposed", title="Where the line is — sta
 for i, (tag, fill, h, b) in enumerate([
         ("Running code", GREEN, "Level 1 · Personal utility", ["CLI + GUI, no server", "Codewords + one .krypt file", "shardic-prime mandatory trustee"]),
         ("Running code", GREEN, "Level 2 · Shardic ceremony", ["Public-key-wrapped delivery", "Keycloak-backed trustee selection", "Automatic backfill on decline"]),
-        ("Design proposal", GOLD, "Level 3 · SPAC", ["Gate any consequential action", "Bound to one Fielded Prime Element", "Human-AI mutual oversight"])]):
+        ("Design proposal", GOLD, "Level 3 · SPAC", ["Shardic protected action code: gate any consequential action", "Bound to one Fielded Prime Element", "Human-AI mutual oversight"])]):
     x = 0.6 + i * 4.1
     card(s, x, 1.7, 3.85, 3.6, None, None)
     pill(s, x + 0.3, 1.98, tag, fill)
@@ -182,10 +182,11 @@ callout(s, 6.6, 5.85, 6.1, 0.85, "A compromised identity provider can stall prov
 
 # 15 — data to capability
 s = d.slide(eyebrow="Where it generalizes", title="From protected file to protected action",
-            notes="[0:27] The plaintext never had to be a file. A SPAC is any enabling value: a signing key, a release-enable code. The Fielded Prime Element reuses shardic-prime's mask so a copied CT SPAC plus a legitimate quorum still fails on the wrong hardware. Precedent: Permissive Action Links, Two-Person Integrity.")
-card(s, 0.6, 1.7, 3.85, 3.5, "PT SPAC → CT SPAC", "Any enabling value — a signing credential, a release-enable code — encrypted and split exactly like a file's key.", ic="lock", body_size=14)
-card(s, 4.7, 1.7, 3.85, 3.5, "Fielded Prime Element", "A hardware-sealed secret takes the prime trustee's slot. Copy the ciphertext elsewhere and a full quorum still fails.", ic="shield", body_size=14)
-card(s, 8.8, 1.7, 3.9, 3.5, "Old idea, new math", "Permissive Action Links and Two-Person Integrity, enforced by the math instead of procedure.", ic="bank", body_size=14)
+            subtitle="**SPAC — shardic protected action code:** the enabling value for a consequential action, held under the same D-of-T rule as a file's key.",
+            notes="[0:27] The plaintext never had to be a file. SPAC stands for shardic protected action code: any enabling value: a signing key, a release-enable code. The Fielded Prime Element reuses shardic-prime's mask so a copied CT SPAC plus a legitimate quorum still fails on the wrong hardware. Precedent: Permissive Action Links, Two-Person Integrity.")
+card(s, 0.6, 2.0, 3.85, 3.25, "PT SPAC → CT SPAC", "Plaintext SPAC in, ciphertext SPAC out — a signing credential or release-enable code, encrypted and split exactly like a file's key.", ic="lock", body_size=14)
+card(s, 4.7, 2.0, 3.85, 3.25, "Fielded Prime Element", "A hardware-sealed secret takes the prime trustee's slot. Copy the ciphertext elsewhere and a full quorum still fails.", ic="shield", body_size=14)
+card(s, 8.8, 2.0, 3.9, 3.25, "Old idea, new math", "Permissive Action Links and Two-Person Integrity, enforced by the math instead of procedure.", ic="bank", body_size=14)
 code(s, 0.6, 5.45, 12.1, 1.15, [
     "DEK     = reconstruct_secret_with_prime(mask, pool_shards)   # unmodified",
     "CT_SPAC = AES-256-GCM(PT_SPAC, DEK)                          # unmodified"], 14)
