@@ -277,11 +277,11 @@ Public-key delivery raises two practical questions, which a follow-on prototype 
 
 - **Ceremony formation.** An operator, authenticated through a dedicated shardic-operator realm role, picks T primary trustees plus an ordered backup list from the candidate directory and sends invitations. Declined or timed-out invitations backfill automatically from the backup list — race-safe, so a late acceptance from an already-backfilled slot gets rejected instead of double-filling it. A separation-of-duties check stops the operator who forms a ceremony from picking themselves as one of its trustees.
 
-- **Delivery.** We deposit wrapped envelopes at an authenticated, single-read drop point, addressed by trustee identity rather than a contact channel. Each trustee fetches their own envelope, once. "Exactly once" doubles as detection: a second read on an already-claimed envelope signals something's wrong.
+- **Delivery.** The combiner holds each trustee's codeword envelope, wrapped to that trustee's public key, and serves it only to that trustee. While a recovery session is open, each trustee fetches their own envelope from an authenticated endpoint, addressed by trustee identity rather than a contact channel; once they've replied in that session, their envelope stops being served. A dedicated single-read drop point — where a second read of an already-claimed envelope would itself signal something's wrong — is designed but not yet built.
 
 - **Recovery.** Unchanged — it's the same act described back in Level 1's walkthrough.
 
-![](./media/ceremony-envelope-flow.png){width="5.2in" height="4.52in"}
+![](./media/ceremony-envelope-flow-v4.1.png){width="5.2in" height="4.52in"}
 
 The organizing principle throughout: identity and selection stay separate from key custody, and both stay separate from the offline, fail-closed recovery math underneath. A compromised identity provider or a stalled ceremony can block provisioning, but neither can weaken the D-of-T guarantee on its own. Level 3 builds directly on this machinery, reusing it unmodified for the pool-trustee side of a SPAC ceremony.
 

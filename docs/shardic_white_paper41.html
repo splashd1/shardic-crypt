@@ -751,15 +751,19 @@ automatically from the backup list — race-safe, so a late acceptance
 from an already-backfilled slot gets rejected instead of double-filling
 it. A separation-of-duties check stops the operator who forms a ceremony
 from picking themselves as one of its trustees.</p></li>
-<li><p><strong>Delivery.</strong> We deposit wrapped envelopes at an
-authenticated, single-read drop point, addressed by trustee identity
-rather than a contact channel. Each trustee fetches their own envelope,
-once. “Exactly once” doubles as detection: a second read on an
-already-claimed envelope signals something’s wrong.</p></li>
+<li><p><strong>Delivery.</strong> The combiner holds each trustee’s
+codeword envelope, wrapped to that trustee’s public key, and serves it
+only to that trustee. While a recovery session is open, each trustee
+fetches their own envelope from an authenticated endpoint, addressed by
+trustee identity rather than a contact channel; once they’ve replied in
+that session, their envelope stops being served. A dedicated single-read
+drop point — where a second read of an already-claimed envelope would
+itself signal something’s wrong — is designed but not yet
+built.</p></li>
 <li><p><strong>Recovery.</strong> Unchanged — it’s the same act
 described back in Level 1’s walkthrough.</p></li>
 </ul>
-<p><img src="./media/ceremony-envelope-flow.png"
+<p><img src="./media/ceremony-envelope-flow-v4.1.png"
 style="width:5.2in;height:4.52in" /></p>
 <p>The organizing principle throughout: identity and selection stay
 separate from key custody, and both stay separate from the offline,
