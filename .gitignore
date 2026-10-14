@@ -16,3 +16,5 @@ demo/media/acts/
 
 # LibreOffice lock files (present while a doc/deck is open)
 .~lock.*#
+.venv/
+.pytest_cache/

@@ -1,3 +1,21 @@
+# Session notes — 2026-10-14 (Claude Code: kdf.py Pyodide fix and pytest suite ported from shardic-vault-web)
+
+## What happened
+
+- **Ported from shardic-vault-web `fa64035`** (the re-sync rule in that repo's CLAUDE.md): `kdf.py`'s single-thread Argon2id path. Argon2id with parallelism > 1 failed under Pyodide ("Threading failure"), so default p=4 vaults couldn't be recovered in a browser. Under emscripten, `derive_key` now calls argon2-cffi's low-level `core()` with lanes = p, threads = 1; native platforms still use `hash_secret_raw`. Output is bit-identical (known-answer vectors, independently checked with hash-wasm). Reviewed in shardic-vault-web by `crypto-core-reviewer`, no blocking findings; the file is byte-identical to that reviewed version.
+- **First pytest suite** (`tests/`, `pytest.ini`, `requirements-dev.txt`, repo `.venv`, git-ignored): KDF vectors for both Argon2id paths, GF(256) any-D-of-T / D−1, plain and prime `.krypt` round trips, tamper detection, no-mapping invariant. 50 passed here. CLAUDE.md's "no automated test suite" gap is removed and the test command added.
+- No CLI/GUI behavior change on native platforms. CI (tag/manual only) not run.
+
+## State at end
+
+Committed and pushed.
+
+## Follow-ups
+
+- **Security, still open:** the `origin` remote URL still embeds a GitHub PAT. Revoke it and switch to a credential helper (`gh auth setup-git`).
+
+---
+
 # Session notes — 2026-10-11 (Claude Code: repo ownership fix, stray files git-ignored, v4.1 paper synced to the user's docx edit + one numeric fix, conference talk deck expanded to v4.1.1 (24 slides + 4 backups), repo links moved to `shardic-crypt`)
 
 ## What happened

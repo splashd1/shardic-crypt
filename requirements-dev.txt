@@ -1,0 +1,2 @@
+# Test dependencies. Runtime: cryptography, argon2-cffi (see README.md).
+pytest==9.0.3

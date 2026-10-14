@@ -47,6 +47,8 @@ only read about it or hear a talk on it.
 - `wordgen.py` — codeword generation (dictionary or synthetic
   pronounceable words).
 - `kdf.py` — PBKDF2 / Argon2id, `ARGON2_AVAILABLE` flag, `default_params()`.
+  Under Pyodide (`ARGON2_THREADS_AVAILABLE` false) Argon2id computes its
+  lanes on one thread; output is bit-identical to the threaded path.
 - `krypt_container.py` — the `.krypt` single-file format: magic header
   + length-prefixed JSON metadata + raw ciphertext (not base64 — avoid
   the size penalty if you're tempted to "simplify" this).
@@ -100,6 +102,12 @@ only read about it or hear a talk on it.
   --threshold 2 --word-length 6 --outdir /tmp/v && python3
   vault_recover.py /tmp/v/*.krypt --outdir /tmp/r --word ... --word
   ...` then `diff -r testdata /tmp/r/testdata`.
+- Tests: `python3 -m venv --system-site-packages .venv &&
+  .venv/bin/pip install -r requirements-dev.txt`, then
+  `.venv/bin/python -m pytest -q` (`tests/`: KDF known-answer vectors
+  for both Argon2id paths, GF(256) any-D-of-T / D−1 properties, plain
+  and prime `.krypt` round trips, tamper detection, no-mapping
+  invariant). Ported from shardic-vault-web `fa64035`.
 - GUI dev loop needs a display. Headless testing used Xvfb
   (`Xvfb :99 -screen 0 1024x768x24 &`, `export DISPLAY=:99`) plus
   driving the Tk widgets programmatically through a real
@@ -121,9 +129,3 @@ only read about it or hear a talk on it.
 
 - Windows build is unverified (see above).
 - AppImage is x86-64 only; no aarch64 build has been produced.
-- No automated test suite exists yet — all verification so far has
-  been manual round-trip scripts (create -> recover -> `diff -r`) run
-  ad hoc. Worth adding `pytest` coverage for `gf256_sss.py` (property
-  tests: any D-of-T subset reconstructs, D-1 doesn't) and
-  `krypt_container.py` (round-trip, truncation/corruption handling)
-  if this grows.
