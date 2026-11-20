@@ -1,20 +1,18 @@
 ---
 name: shardic-sync
-description: End-of-session sync for the shardic repo. Summarizes this conversation's work into notes.md and commits + pushes it, so a Claude Code session on a different machine can pick up context (a SessionStart hook auto-pulls and surfaces notes.md there). Invoke when the user is wrapping up a shardic session, or says things like "sync notes", "wrap up", "save session notes", "/shardic-sync".
+description: Record a shardic session handoff in notes.md. Use when asked to wrap up, save session notes, sync notes, or run /shardic-sync. An explicit sync request publishes the handoff to the current task branch.
 ---
 
 # shardic-sync
 
 Run this at the end of a shardic working session, right before the user
 closes out, so the *next* session — possibly on a different machine —
-starts with full context via the `SessionStart` hook
-(`.claude/hooks/session-start-sync.sh`), which auto-pulls and surfaces
-`notes.md`.
+can pick up the handoff after explicitly updating its checkout.
+Claude Code's SessionStart hook displays the local `notes.md`.
 
 ## Steps
 
-1. **Check for anything worth recording.** Run `git -C
-   "$CLAUDE_PROJECT_DIR" status --short` and think back over this
+1. **Check for anything worth recording.** Run `git status --short --branch` from the repository worktree and think back over this
    conversation. If nothing meaningful happened (pure Q&A, no code
    changes, no decisions, no state worth remembering), say so and stop
    — don't write a content-free entry just to have one.
@@ -24,8 +22,7 @@ starts with full context via the `SessionStart` hook
    duplicate it.
 
 3. **Write a new dated section summarizing *this* session**, prepended
-   above any previous entries (newest first, so the next `SessionStart`
-   pull surfaces the freshest context immediately without scrolling).
+   above any previous entries so the newest handoff appears first.
    Use today's date. Cover, in your own judgment of what's relevant:
    - What was done (decisions made, files changed, commits created,
      commands run) — not a blow-by-blow transcript, a summary someone
@@ -37,22 +34,16 @@ starts with full context via the `SessionStart` hook
    Keep it tight — this is a handoff note, not a changelog. Match the
    structure/tone of existing entries in the file if there are any.
 
-4. **Stage, commit, and push** in one flow, no confirmation needed —
-   this workflow was explicitly set up by the user to auto-sync:
-   ```
-   git -C "$CLAUDE_PROJECT_DIR" add notes.md
-   git -C "$CLAUDE_PROJECT_DIR" commit -m "<short summary>
+4. **Publish only on an explicit sync or push request.** For a request
+   to save or wrap up, leave the handoff in the working tree. If publishing
+   was requested, check the branch, verify that `notes.md` contains only
+   the intended handoff diff, and commit just that file with
+   `git commit --only -m "Update session handoff" -- notes.md`.
+   Push the current branch to its configured upstream. If there is no
+   upstream, the branch has diverged, or the push fails, report the state
+   so the user can coordinate integration.
 
-   Fine-tuned, vetted, and, in some cases, supplemented by Claude Sonnet 5"
-   git -C "$CLAUDE_PROJECT_DIR" push
-   ```
-   If push fails (e.g. remote has commits this machine doesn't — another
-   machine synced first), run `git pull --rebase` then push again. If
-   that still conflicts, stop and surface it to the user rather than
-   force-pushing.
-
-5. **Report back** in 1-2 sentences: what got recorded and confirmation
-   it's pushed.
+5. **Report back** in 1-2 sentences: what got recorded and whether it was pushed.
 
 ## What NOT to do
 
