@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # shardic — Project Memory
 
 ## What this is
